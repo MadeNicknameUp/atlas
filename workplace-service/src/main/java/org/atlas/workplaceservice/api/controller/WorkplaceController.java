@@ -3,6 +3,7 @@ package org.atlas.workplaceservice.api.controller;
 import lombok.RequiredArgsConstructor;
 import org.atlas.workplaceservice.api.dto.request.WorkplaceCreatedRequest;
 import org.atlas.workplaceservice.api.dto.response.WorkplaceCreatedResponse;
+import org.atlas.workplaceservice.api.dto.response.WorkplaceGetResponse;
 import org.atlas.workplaceservice.api.service.WorkplaceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,16 @@ public class WorkplaceController {
                                 request.name(),
                                 request.description(),
                                 ownerId)
+        ));
+    }
+
+    @GetMapping("/{workplaceId}")
+    public ResponseEntity<WorkplaceGetResponse> getWorkplace(
+            @PathVariable("workplaceId") UUID workplaceId
+    ) {
+
+        return ResponseEntity.ok(WorkplaceGetResponse.from(
+                workplaceService.getWorkplaceById(workplaceId)
         ));
     }
 }
