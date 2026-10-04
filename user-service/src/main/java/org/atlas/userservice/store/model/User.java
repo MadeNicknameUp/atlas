@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,15 +32,15 @@ public class User {
 
     @Column(name = "active", nullable = false)
     @Builder.Default
-    private boolean active = true;
+    private Boolean active = true;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "preferences", columnDefinition = "jsonb")
-    private String preferences;
+    private JsonNode preferences;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "notification_preferences", columnDefinition = "jsonb")
-    private String notificationPreferences;
+    private JsonNode notificationPreferences;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

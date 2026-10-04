@@ -23,29 +23,35 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PatchMapping("/me/profile")
-    public ResponseEntity<User> updateProfile(Principal principal, @RequestBody User profileFields) {
-        UUID userId = extractUserId(principal);
+    @PatchMapping("/{userId}/profile")
+    public ResponseEntity<User> updateProfile(
+            @PathVariable UUID userId,
+            @RequestBody User profileFields
+    ) {
         return ResponseEntity.ok(userService.updateProfile(userId, profileFields));
     }
 
-    @PatchMapping("/me/preferences")
-    public ResponseEntity<User> updatePreferences(Principal principal, @RequestBody User preferences) {
-        UUID userId = extractUserId(principal);
+    @PatchMapping("/{userId}/preferences")
+    public ResponseEntity<User> updatePreferences(
+            @PathVariable UUID userId,
+            @RequestBody User preferences
+    ) {
         return ResponseEntity.ok(userService.updatePreferences(userId, preferences));
     }
 
-    @PatchMapping("/me/notificationPreferences")
-    public ResponseEntity<User> updateNotificationPreferences(Principal principal, @RequestBody User preferences) {
-        UUID userId = extractUserId(principal);
+    @PatchMapping("/{userId}/notificationPreferences")
+    public ResponseEntity<User> updateNotificationPreferences(
+            @PathVariable UUID userId,
+            @RequestBody User preferences
+    ) {
         return ResponseEntity.ok(userService.updateNotificationPreferences(userId, preferences));
     }
 
-    private UUID extractUserId(Principal principal) {
-        //principal.getName() returns UUID from Keycloak's token
-        String userIdStr = (principal != null && principal.getName() != null)
-                ? principal.getName()
-                : "123e4567-e89b-12d3-a456-426614174000"; // DEFAULT UUID
-        return UUID.fromString(userIdStr);
-    }
+//    private UUID extractUserId(Principal principal) {
+//        //principal.getName() returns UUID from Keycloak's token
+//        String userIdStr = (principal != null && principal.getName() != null)
+//                ? principal.getName()
+//                : "123e4567-e89b-12d3-a456-426614174000"; // DEFAULT UUID
+//        return UUID.fromString(userIdStr);
+//    }
 }
