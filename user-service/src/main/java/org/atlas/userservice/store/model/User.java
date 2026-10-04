@@ -3,7 +3,9 @@ package org.atlas.userservice.store.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,10 +29,16 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
-    @Column(name = "preferences", columnDefinition = "TEXT")
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private boolean active = true;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "preferences", columnDefinition = "jsonb")
     private String preferences;
 
-    @Column(name = "notification_preferences", columnDefinition = "TEXT")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "notification_preferences", columnDefinition = "jsonb")
     private String notificationPreferences;
 
     @CreationTimestamp

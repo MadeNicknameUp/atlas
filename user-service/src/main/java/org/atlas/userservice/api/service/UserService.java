@@ -1,6 +1,7 @@
 package org.atlas.userservice.api.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.atlas.userservice.api.exception.unit.NotFoundException;
 import org.atlas.userservice.store.model.User;
 import org.atlas.userservice.store.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -17,43 +18,49 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    // POST
-    @Transactional
-    public User createUser(User user){
-        return userRepository.save(user);
-    }
-
     //GET
     public User getUserById(UUID id){
-        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + id));
     }
 
-    //PATCH
+    // PATCH (displayName, avatarUrl)
     @Transactional
-    public User updateUser(UUID id, User updatedFields) {
+    public User updateProfile(UUID id, User profileFields) {
         User existingUser = getUserById(id);
-        if (updatedFields.getDisplayName() != null) {
-            existingUser.setDisplayName(updatedFields.getDisplayName());
+
+        if (profileFields.getDisplayName() != null) {
+            existingUser.setDisplayName(profileFields.getDisplayName());
         }
-        if (updatedFields.getAvatarUrl() != null) {
-            existingUser.setAvatarUrl(updatedFields.getAvatarUrl());
-        }
-        if (updatedFields.getPreferences() != null) {
-            existingUser.setPreferences(updatedFields.getPreferences());
-        }
-        if (updatedFields.getNotificationPreferences() != null) {
-            existingUser.setNotificationPreferences(updatedFields.getNotificationPreferences());
+        if (profileFields.getAvatarUrl() != null) {
+            existingUser.setAvatarUrl(profileFields.getAvatarUrl());
         }
 
         return userRepository.save(existingUser);
     }
 
-    //DELETE
+    // PATCH (preferences)
     @Transactional
-    public void deleteUser(UUID id) {
-        if (!userRepository.existsById(id)) {
-            throw new EntityNotFoundException("User not found with ID: " + id);
+    public User updatePreferences(UUID id, User preferenceFields) {
+        User existingUser = getUserById(id);
+
+        if (preferenceFields.getPreferences() != null) {
+            existingUser.setPreferences(preferenceFields.getPreferences());
         }
-        userRepository.deleteById(id);
+
+        return userRepository.save(existingUser);
     }
+
+    // PATCH (notificationPreferences)
+    @Transactional
+    public User updateNotificationPreferences(UUID id, User notificationFields) {
+        User existingUser = getUserById(id);
+
+        if (notificationFields.getNotificationPreferences() != null) {
+            existingUser.setNotificationPreferences(notificationFields.getNotificationPreferences());
+        }
+
+        return userRepository.save(existingUser);
+    }
+
 }
