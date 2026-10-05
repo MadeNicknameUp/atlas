@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 public class TestWorkplaceServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.from(WorkplaceServiceApplication::main).with(TestcontainersConfiguration.class).run(args);
+        SpringApplication.from(WorkspaceServiceApplication::main).with(TestcontainersConfiguration.class).run(args);
     }
 
 }

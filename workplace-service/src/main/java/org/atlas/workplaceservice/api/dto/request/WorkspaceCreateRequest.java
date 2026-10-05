@@ -1,6 +1,6 @@
 package org.atlas.workplaceservice.api.dto.request;
 
-public record WorkplaceCreatedRequest(
+public record WorkspaceCreateRequest(
         String name,
         String description
 ) {

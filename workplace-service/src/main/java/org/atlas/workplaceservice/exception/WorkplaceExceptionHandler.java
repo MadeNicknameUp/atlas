@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.workplaceservice.exception.dto.ExceptionResponse;
 import org.atlas.workplaceservice.exception.unit.NotFoundException;
+import org.atlas.workplaceservice.exception.unit.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,18 +15,34 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class WorkplaceExceptionHandler {
 
     @ExceptionHandler(value = { NotFoundException.class })
-    public ResponseEntity<ExceptionResponse> handleNotFoundException(HttpServletRequest request, NotFoundException exception) {
+    public ResponseEntity<ExceptionResponse> handleNotFoundException(
+            HttpServletRequest request,
+            NotFoundException exception
+    ) {
 
-        log.warn("{}: {}. Happened on: {}.",
-                exception.getClass().getSimpleName(),
-                exception.getMessage(),
-                request.getRequestURI()
-        );
+        logWarning(request, exception);
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ExceptionResponse(
                         HttpStatus.NOT_FOUND.value(),
+                        exception.getMessage(),
+                        request.getRequestURI()
+                ));
+    }
+
+    @ExceptionHandler(value = { ValidationException.class })
+    public ResponseEntity<ExceptionResponse> handleValidationException(
+            HttpServletRequest request,
+            NotFoundException exception
+    ) {
+
+        logWarning(request, exception);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(
+                        HttpStatus.BAD_REQUEST.value(),
                         exception.getMessage(),
                         request.getRequestURI()
                 ));
@@ -47,6 +64,17 @@ public class WorkplaceExceptionHandler {
                         exception.getMessage(),
                         request.getRequestURI()
                 ));
+    }
+
+    private void logWarning(
+            HttpServletRequest request,
+            Exception exception
+    ) {
+        log.warn("{}: {}. Happened on: {}.",
+                exception.getClass().getSimpleName(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
     }
 
 }

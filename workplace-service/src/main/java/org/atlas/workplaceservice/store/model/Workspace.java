@@ -1,10 +1,7 @@
 package org.atlas.workplaceservice.store.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,7 +16,7 @@ import java.util.UUID;
 @Table(name = "atlas_workplaces")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Workplace {
+public class Workspace {
 
     @Id
     @GeneratedValue(strategy= GenerationType.UUID)
@@ -46,12 +43,24 @@ public class Workplace {
     @CreationTimestamp
     private Instant createdAt;
 
-    public static Workplace create(String name, String description, UUID ownerId) {
-        Workplace workplace = new Workplace();
-        workplace.setName(name);
-        workplace.setDescription(description);
-        workplace.getMembers().add(new Member(ownerId, MemberRole.OWNER, workplace));
-        workplace.ownerId = ownerId;
-        return workplace;
+    public static Workspace create(String name, String description, UUID ownerId) {
+        Workspace workspace = new Workspace();
+        workspace.setName(name);
+        workspace.setDescription(description);
+        workspace.getMembers().add(new Member(ownerId, MemberRole.OWNER, workspace));
+        workspace.ownerId = ownerId;
+        return workspace;
+    }
+
+    public void rename(@NonNull String newName) {
+        this.name = newName;
+    }
+
+    public void updateDescription(String newDescription) {
+        this.description = newDescription;
+    }
+
+    public void clearDescription() {
+        description = "";
     }
 }
