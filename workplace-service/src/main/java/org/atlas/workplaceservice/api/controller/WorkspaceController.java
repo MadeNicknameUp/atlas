@@ -23,27 +23,28 @@ public class WorkspaceController {
 
     @PostMapping
     public ResponseEntity<WorkspaceCreatedResponse> createWorkplace(
-            @RequestBody WorkspaceCreateRequest request,
-            @PathVariable(name= "ownerId") UUID ownerId
+            @RequestBody WorkspaceCreateRequest request
     ) {
+
+        UUID ownerId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(WorkspaceCreatedResponse.from(
                         workspaceService.createWorkspace(
-                                request.name(),
-                                request.description(),
-                                ownerId)
+                                ownerId,
+                                request.toCommand()
+                        )
         ));
     }
 
     @GetMapping
-    public ResponseEntity<List<ThickWorkspaceResponse>> getWorkplaces(
-            @PathVariable("workspaceId") UUID workspaceId
-    ) {
+    public ResponseEntity<List<ThickWorkspaceResponse>> getWorkplaces() {
+
+        UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
         return ResponseEntity.ok(workspaceService
-                .getWorkplacesByUserId(workspaceId)
+                .getWorkplacesByUserId(userId)
                 .stream()
                 .map(ThickWorkspaceResponse::from)
                 .toList()
@@ -55,8 +56,10 @@ public class WorkspaceController {
             @PathVariable("workspaceId") UUID workspaceId
     ) {
 
+        UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
         return ResponseEntity.ok(ThinWorkspaceResponse.from(
-                workspaceService.getWorkplaceById(workspaceId)
+                workspaceService.getWorkplaceById(userId, workspaceId)
         ));
     }
 
@@ -66,8 +69,20 @@ public class WorkspaceController {
             @RequestBody WorkspaceUpdateRequest request
     ) {
 
+        UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
         return ResponseEntity.ok(ThickWorkspaceResponse.from(
-                workspaceService.updateWorkspace(workspaceId, request.toCommand())
+                workspaceService.updateWorkspace(userId, workspaceId, request.toCommand())
+        ));
+    }
+
+    @PostMapping("/{workspaceId}/archive")
+    public ResponseEntity<ThinWorkspaceResponse> archiveWorkspace(@PathVariable UUID workspaceId) {
+
+        UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
+        return ResponseEntity.ok(ThinWorkspaceResponse.from(
+                workspaceService.archiveWorkspace(userId, workspaceId)
         ));
     }
 }

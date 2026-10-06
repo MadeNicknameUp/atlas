@@ -25,11 +25,16 @@ public class Workspace {
     @Column(nullable = false)
     private String name;
 
+    private String iconUrl;
+
     private String description;
+
+    private WorkspaceState state;
 
     @Column(nullable = false)
     private UUID ownerId;
 
+    // Must be changed to LAZY later.
     @OneToMany(
             cascade = CascadeType.ALL,
             orphanRemoval = true,
@@ -43,12 +48,17 @@ public class Workspace {
     @CreationTimestamp
     private Instant createdAt;
 
-    public static Workspace create(String name, String description, UUID ownerId) {
+    public static Workspace create(String name, String iconUrl, String description, UUID ownerId) {
+
         Workspace workspace = new Workspace();
+
         workspace.setName(name);
+        workspace.setIconUrl(iconUrl);
         workspace.setDescription(description);
         workspace.getMembers().add(new Member(ownerId, MemberRole.OWNER, workspace));
         workspace.ownerId = ownerId;
+        workspace.state = WorkspaceState.ACTIVE;
+
         return workspace;
     }
 
@@ -62,5 +72,14 @@ public class Workspace {
 
     public void clearDescription() {
         description = "";
+    }
+
+    public void archive() {
+
+        if (state == WorkspaceState.ARCHIVED) {
+            throw new IllegalStateException("Workspace with id: %s is already archived.".formatted(this.id));
+        }
+
+        state = WorkspaceState.ARCHIVED;
     }
 }

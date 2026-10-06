@@ -1,6 +1,7 @@
 package org.atlas.workplaceservice.api.service;
 
 import lombok.RequiredArgsConstructor;
+import org.atlas.workplaceservice.api.dto.command.CreateWorkspaceCommand;
 import org.atlas.workplaceservice.api.dto.command.PatchValue;
 import org.atlas.workplaceservice.api.dto.command.WorkspaceUpdateCommand;
 import org.atlas.workplaceservice.exception.unit.NotFoundException;
@@ -23,15 +24,27 @@ public class WorkspaceService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public Workspace createWorkspace(String name, String description, UUID ownerId) {
+    public Workspace createWorkspace(UUID ownerId, CreateWorkspaceCommand createWorkspaceCommand) {
 
-        return workspaceRepository.save(Workspace.create(name, description, ownerId));
+        return workspaceRepository.save(Workspace.create(
+                createWorkspaceCommand.name(),
+                createWorkspaceCommand.iconUrl(),
+                createWorkspaceCommand.description(),
+                ownerId
+                ));
     }
 
-    public Workspace getWorkplaceById(UUID workspaceId) {
+    public Workspace getWorkplaceById(UUID userId, UUID workspaceId) {
 
-        return workspaceRepository.findById(workspaceId)
+        Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
+
+        // This has to be replaced with smth more efficient later.
+        if (workspace.getMembers().stream().noneMatch(member -> member.getUserId().equals(userId))) {
+            throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
+        }
+
+        return workspace;
     }
 
     public List<Workspace> getWorkplacesByUserId(UUID memberId) {
@@ -44,10 +57,15 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public Workspace updateWorkspace(UUID workspaceId, WorkspaceUpdateCommand workspaceUpdateCommand) {
+    public Workspace updateWorkspace(UUID userId, UUID workspaceId, WorkspaceUpdateCommand workspaceUpdateCommand) {
 
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
+
+        // This has to be A: Changed later. B: Depend on workspace settings.
+        if(!workspace.getOwnerId().equals(userId)) {
+            throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
+        }
 
         switch (workspaceUpdateCommand.name()){
             case PatchValue.Unchanged<String> _ -> {}
@@ -62,5 +80,19 @@ public class WorkspaceService {
         }
 
         return workspaceRepository.save(workspace);
+    }
+
+    public Workspace archiveWorkspace(UUID userId, UUID workspaceId) {
+
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
+
+        if(!workspace.getOwnerId().equals(userId)) {
+            throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
+        }
+
+        workspace.archive();
+
+        return workspace;
     }
 }
