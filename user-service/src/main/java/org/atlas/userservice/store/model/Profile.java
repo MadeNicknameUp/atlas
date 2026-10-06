@@ -14,24 +14,23 @@ import java.util.UUID;
 public class Profile {
 
     @Id
-    @Column(name = "id", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    // OneToOne with User
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(name = "full_name", length = 100)
+    @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "display_name", length = 100)
+    @Column(name = "display_name")
     private String displayName;
 
-    @Column(name = "username", length = 100)
-    private String userName;
+    @Column(name = "username")
+    private String username;
 
-    @Column(name = "about", length = 300)
+    @Column(name = "about")
     private String about;
 
     @Column(name = "position")

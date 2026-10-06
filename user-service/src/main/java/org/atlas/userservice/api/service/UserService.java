@@ -1,66 +1,67 @@
 package org.atlas.userservice.api.service;
 
-import jakarta.persistence.EntityNotFoundException;
-import org.atlas.userservice.api.exception.unit.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.atlas.userservice.api.dto.request.UpdateProfileRequest;
+import org.atlas.userservice.store.model.Profile;
 import org.atlas.userservice.store.model.User;
 import org.atlas.userservice.store.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    @Transactional(readOnly = true)
+    public User getBySubject(String subject) {
+        return userRepository.findByIdentitySubject(subject).orElseThrow(() -> new UserNotFoundException(subject));
     }
 
-    //GET
-    public User getUserById(UUID id){
-        return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found with ID: " + id));
-    }
-
-    // PATCH (displayName, avatarUrl)
     @Transactional
-    public User updateProfile(UUID id, User profileFields) {
-        User existingUser = getUserById(id);
+    public User updateProfile(String subject, UpdateProfileRequest req) {
+        User user = getBySubject(subject);
 
-        if (profileFields.getDisplayName() != null) {
-            existingUser.setDisplayName(profileFields.getDisplayName());
-        }
-        if (profileFields.getAvatarUrl() != null) {
-            existingUser.setAvatarUrl(profileFields.getAvatarUrl());
+        Profile profile = user.getProfile();
+        if (profile == null) {
+            profile = new Profile();
+            profile.setUser(user);
+            user.setProfile(profile);
         }
 
-        return userRepository.save(existingUser);
+        if (req.fullName() != null)    profile.setFullName(req.fullName());
+        if (req.displayName() != null) profile.setDisplayName(req.displayName());
+        if (req.username() != null)    profile.setUsername(req.username());
+        if (req.about() != null)       profile.setAbout(req.about());
+        if (req.position() != null)    profile.setPosition(req.position());
+
+        return user;
     }
 
-    // PATCH (preferences)
     @Transactional
-    public User updatePreferences(UUID id, User preferenceFields) {
-        User existingUser = getUserById(id);
-
-        if (preferenceFields.getPreferences() != null) {
-            existingUser.setPreferences(preferenceFields.getPreferences());
-        }
-
-        return userRepository.save(existingUser);
+    public User updatePreferences(String subject, Map<String, Object> patch) {
+        User user = getBySubject(subject);
+        user.setPreferences(merge(user.getPreferences(), patch));
+        return user;
     }
 
-    // PATCH (notificationPreferences)
     @Transactional
-    public User updateNotificationPreferences(UUID id, User notificationFields) {
-        User existingUser = getUserById(id);
-
-        if (notificationFields.getNotificationPreferences() != null) {
-            existingUser.setNotificationPreferences(notificationFields.getNotificationPreferences());
-        }
-
-        return userRepository.save(existingUser);
+    public User updateNotificationPreferences(String subject, Map<String, Object> patch) {
+        User user = getBySubject(subject);
+        user.setNotificationPreferences(merge(user.getNotificationPreferences(), patch));
+        return user;
     }
 
+    private Map<String, Object> merge(Map<String, Object> current, Map<String, Object> patch) {
+        Map<String, Object> result = new HashMap<>(current);
+        patch.forEach((k, v) -> {
+            if (v == null) result.remove(k);
+            else result.put(k, v);
+        });
+        return result;   // новая Map, чтобы Hibernate точно увидел изменение
+    }
 }

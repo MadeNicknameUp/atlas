@@ -1,57 +1,53 @@
 package org.atlas.userservice.api.controller;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.atlas.userservice.api.dto.request.UpdateProfileRequest;
+import org.atlas.userservice.api.dto.response.UserResponse;
 import org.atlas.userservice.api.service.UserService;
-import org.atlas.userservice.store.model.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.UUID;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/users/me")
+@RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    @GetMapping
+    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(UserResponse.from(userService.getBySubject(jwt.getSubject())));
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<User> getUserById(@PathVariable UUID userId) {
-        User user = userService.getUserById(userId);
-        return ResponseEntity.ok(user);
-    }
-
-    @PatchMapping("/{userId}/profile")
-    public ResponseEntity<User> updateProfile(
-            @PathVariable UUID userId,
-            @RequestBody User profileFields
+    @PatchMapping("/profile")
+    public ResponseEntity<UserResponse> updateProfile(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody UpdateProfileRequest request
     ) {
-        return ResponseEntity.ok(userService.updateProfile(userId, profileFields));
+        return ResponseEntity.ok(UserResponse.from(
+                userService.updateProfile(jwt.getSubject(), request)));
     }
 
-    @PatchMapping("/{userId}/preferences")
-    public ResponseEntity<User> updatePreferences(
-            @PathVariable UUID userId,
-            @RequestBody User preferences
+    @PatchMapping("/preferences")
+    public ResponseEntity<UserResponse> updatePreferences(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody Map<String, Object> request
     ) {
-        return ResponseEntity.ok(userService.updatePreferences(userId, preferences));
+        return ResponseEntity.ok(UserResponse.from(
+                userService.updatePreferences(jwt.getSubject(), request)));
     }
 
-    @PatchMapping("/{userId}/notificationPreferences")
-    public ResponseEntity<User> updateNotificationPreferences(
-            @PathVariable UUID userId,
-            @RequestBody User preferences
+    @PatchMapping("/notification-preferences")
+    public ResponseEntity<UserResponse> updateNotificationPreferences(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody Map<String, Object> request
     ) {
-        return ResponseEntity.ok(userService.updateNotificationPreferences(userId, preferences));
+        return ResponseEntity.ok(UserResponse.from(
+                userService.updateNotificationPreferences(jwt.getSubject(), request)));
     }
-
-//    private UUID extractUserId(Principal principal) {
-//        //principal.getName() returns UUID from Keycloak's token
-//        String userIdStr = (principal != null && principal.getName() != null)
-//                ? principal.getName()
-//                : "123e4567-e89b-12d3-a456-426614174000"; // DEFAULT UUID
-//        return UUID.fromString(userIdStr);
-//    }
 }

@@ -6,9 +6,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
-import tools.jackson.databind.JsonNode;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -21,32 +22,31 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @Column(name = "id", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "display_name", length = 100)
-    private String displayName;
+    @Column(name = "identity_subject", nullable = false, unique = true)
+    private String identitySubject;
 
-    @Column(name = "avatar_url")
-    private String avatarUrl;
+    @Column(nullable = false)
+    private boolean active = true;
 
-    @Column(name = "active", nullable = false)
-    @Builder.Default
-    private Boolean active = true;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "preferences", columnDefinition = "jsonb")
-    private JsonNode preferences;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Profile profile;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "notification_preferences", columnDefinition = "jsonb")
-    private JsonNode notificationPreferences;
+    @Column(name = "notification_preferences", columnDefinition = "jsonb", nullable = false)
+    private Map<String, Object> preferences = new HashMap<>();
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "notification_preferences", columnDefinition = "jsonb", nullable = false)
+    private Map<String, Object> notificationPreferences = new HashMap<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 }
