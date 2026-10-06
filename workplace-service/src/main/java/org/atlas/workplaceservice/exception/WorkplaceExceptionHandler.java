@@ -34,7 +34,7 @@ public class WorkplaceExceptionHandler {
     @ExceptionHandler(value = { ValidationException.class })
     public ResponseEntity<ExceptionResponse> handleValidationException(
             HttpServletRequest request,
-            NotFoundException exception
+            ValidationException exception
     ) {
 
         logWarning(request, exception);
@@ -47,6 +47,24 @@ public class WorkplaceExceptionHandler {
                         request.getRequestURI()
                 ));
     }
+
+    @ExceptionHandler(value = {
+            IllegalArgumentException.class,
+            IllegalStateException.class
+    })
+    public ResponseEntity<ExceptionResponse> handleIllegalArgumentOrStateException(HttpServletRequest request, RuntimeException exception) {
+
+        logWarning(request, exception);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(
+                        HttpStatus.BAD_REQUEST.value(),
+                        exception.getMessage(),
+                        request.getRequestURI()
+                ));
+    }
+
 
     @ExceptionHandler(value = { Exception.class })
     public ResponseEntity<ExceptionResponse> handleOtherException(HttpServletRequest request, Exception exception) {

@@ -82,6 +82,7 @@ public class WorkspaceService {
         return workspaceRepository.save(workspace);
     }
 
+    @Transactional
     public Workspace archiveWorkspace(UUID userId, UUID workspaceId) {
 
         Workspace workspace = workspaceRepository.findById(workspaceId)
@@ -93,6 +94,6 @@ public class WorkspaceService {
 
         workspace.archive();
 
-        return workspace;
+        return workspaceRepository.save(workspace);
     }
 }

@@ -10,7 +10,9 @@ import java.util.UUID;
 public record ThickWorkspaceResponse(
         UUID workplaceId,
         String name,
+        String iconUrl,
         String description,
+        String state,
         UUID ownerId,
         List<UUID> memberIds,
         Instant updatedAt,
@@ -22,7 +24,9 @@ public record ThickWorkspaceResponse(
         return new ThickWorkspaceResponse(
                 workspace.getId(),
                 workspace.getName(),
+                workspace.getIconUrl(),
                 workspace.getDescription(),
+                workspace.getState().toString(),
                 workspace.getOwnerId(),
                 workspace.getMembers()
                         .stream()

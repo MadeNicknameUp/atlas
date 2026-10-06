@@ -8,7 +8,9 @@ import java.util.UUID;
 public record ThinWorkspaceResponse(
         UUID workplaceId,
         String name,
+        String iconUrl,
         String description,
+        String state,
         UUID ownerId,
         Instant createdAt
 ) {
@@ -17,7 +19,9 @@ public record ThinWorkspaceResponse(
         return new ThinWorkspaceResponse(
                 workspace.getId(),
                 workspace.getName(),
+                workspace.getIconUrl(),
                 workspace.getDescription(),
+                workspace.getState().toString(),
                 workspace.getOwnerId(),
                 workspace.getCreatedAt()
         );

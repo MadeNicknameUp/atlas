@@ -34,11 +34,10 @@ public class Workspace {
     @Column(nullable = false)
     private UUID ownerId;
 
-    // Must be changed to LAZY later.
     @OneToMany(
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.EAGER
+            fetch = FetchType.LAZY
     )
     private List<Member> members = new ArrayList<>();
 
