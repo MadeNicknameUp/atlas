@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "atlas_workplaces")
+@Table(name = "atlas_workspace")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Workspace {
