@@ -1,4 +1,4 @@
-package org.atlas.workspace.store.model;
+package org.atlas.workspace.store.domain;
 
 public enum MemberRole {
     OWNER,

@@ -1,4 +1,4 @@
-package org.atlas.workspace.store.model;
+package org.atlas.workspace.store.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,6 +35,7 @@ public class Workspace {
     private UUID ownerId;
 
     @OneToMany(
+            mappedBy = "id",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY
@@ -54,7 +55,10 @@ public class Workspace {
         workspace.setName(name);
         workspace.setIconUrl(iconUrl);
         workspace.setDescription(description);
-        workspace.getMembers().add(new Member(ownerId, MemberRole.OWNER, workspace));
+        workspace.getMembers().add(Member.createOwner(
+                ownerId,
+                workspace
+        ));
         workspace.ownerId = ownerId;
         workspace.state = WorkspaceState.ACTIVE;
 

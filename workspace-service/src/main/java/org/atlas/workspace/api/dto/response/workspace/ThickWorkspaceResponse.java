@@ -1,7 +1,7 @@
-package org.atlas.workspace.api.dto.response;
+package org.atlas.workspace.api.dto.response.workspace;
 
-import org.atlas.workspace.store.model.Member;
-import org.atlas.workspace.store.model.Workspace;
+import org.atlas.workspace.store.domain.Member;
+import org.atlas.workspace.store.domain.Workspace;
 
 import java.time.Instant;
 import java.util.List;

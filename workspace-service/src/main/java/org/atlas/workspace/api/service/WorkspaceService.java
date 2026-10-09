@@ -1,14 +1,14 @@
 package org.atlas.workspace.api.service;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.workspace.api.dto.command.CreateWorkspaceCommand;
-import org.atlas.workspace.api.dto.command.FindWorkspacesQuery;
+import org.atlas.workspace.api.dto.command.workspace.CreateWorkspaceCommand;
+import org.atlas.workspace.api.dto.command.FindEntityQuery;
 import org.atlas.workspace.api.dto.command.PatchValue;
-import org.atlas.workspace.api.dto.command.WorkspaceUpdateCommand;
+import org.atlas.workspace.api.dto.command.workspace.UpdateWorkspaceCommand;
 import org.atlas.workspace.exception.unit.NotFoundException;
 import org.atlas.workspace.exception.unit.ValidationException;
-import org.atlas.workspace.store.model.Member;
-import org.atlas.workspace.store.model.Workspace;
+import org.atlas.workspace.store.domain.Member;
+import org.atlas.workspace.store.domain.Workspace;
 import org.atlas.workspace.store.repository.MemberRepository;
 import org.atlas.workspace.store.repository.WorkspaceRepository;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +42,7 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
 
-        // This has until be replaced with smth more efficient later.
+        // This has joinedUntil be replaced with smth more efficient later.
         if (workspace.getMembers().stream().noneMatch(member -> member.getUserId().equals(userId))) {
             throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
         }
@@ -50,7 +50,7 @@ public class WorkspaceService {
         return workspace;
     }
 
-    public List<Workspace> getWorkplacesByUserId(UUID memberId, FindWorkspacesQuery query) {
+    public List<Workspace> getWorkplacesByUserId(UUID memberId, FindEntityQuery<Workspace> query) {
 
         Pageable page = PageRequest.of(
                 (query.page() == null || query.page() < 0) ? 0 : query.page(),
@@ -60,29 +60,29 @@ public class WorkspaceService {
         return memberRepository
                 .findAllByUserId(memberId, page)
                 .stream()
-                .map(Member::getWorkplace)
+                .map(Member::getWorkspace)
                 .filter(w -> query.filter().applyOn(w))
                 .toList();
     }
 
     @Transactional
-    public Workspace updateWorkspace(UUID userId, UUID workspaceId, WorkspaceUpdateCommand workspaceUpdateCommand) {
+    public Workspace updateWorkspace(UUID userId, UUID workspaceId, UpdateWorkspaceCommand command) {
 
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
 
-        // This has until be A: Changed later. B: Depend on workspace settings.
+        // This has joinedUntil be A: Changed later. B: Depend on workspace settings.
         if(!workspace.getOwnerId().equals(userId)) {
             throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
         }
 
-        switch (workspaceUpdateCommand.name()){
+        switch (command.name()){
             case PatchValue.Unchanged<String> _ -> {}
             case PatchValue.Set<String> value -> workspace.rename(value.value());
             case PatchValue.Clear<String> _ -> throw new ValidationException("Name may not be empty.");
         }
 
-        switch (workspaceUpdateCommand.description()){
+        switch (command.description()){
             case PatchValue.Unchanged<String> _ -> {}
             case PatchValue.Set<String> value -> workspace.updateDescription(value.value());
             case PatchValue.Clear<String> _ -> workspace.clearDescription();

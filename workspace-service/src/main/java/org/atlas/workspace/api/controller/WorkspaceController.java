@@ -1,13 +1,13 @@
 package org.atlas.workspace.api.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.workspace.api.dto.command.FindWorkspacesQuery;
-import org.atlas.workspace.api.dto.request.WorkspaceCreateRequest;
-import org.atlas.workspace.api.dto.request.WorkspaceFilter;
-import org.atlas.workspace.api.dto.request.WorkspaceUpdateRequest;
-import org.atlas.workspace.api.dto.response.ThinWorkspaceResponse;
-import org.atlas.workspace.api.dto.response.WorkspaceCreatedResponse;
-import org.atlas.workspace.api.dto.response.ThickWorkspaceResponse;
+import org.atlas.workspace.api.dto.command.FindEntityQuery;
+import org.atlas.workspace.api.dto.request.workspace.WorkspaceCreateRequest;
+import org.atlas.workspace.api.dto.request.workspace.WorkspaceFilter;
+import org.atlas.workspace.api.dto.request.workspace.WorkspaceUpdateRequest;
+import org.atlas.workspace.api.dto.response.workspace.ThinWorkspaceResponse;
+import org.atlas.workspace.api.dto.response.workspace.WorkspaceCreatedResponse;
+import org.atlas.workspace.api.dto.response.workspace.ThickWorkspaceResponse;
 import org.atlas.workspace.api.service.WorkspaceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +50,7 @@ public class WorkspaceController {
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
         return ResponseEntity.ok(workspaceService
-                .getWorkplacesByUserId(userId, new FindWorkspacesQuery(filter, page, pageSize))
+                .getWorkplacesByUserId(userId, new FindEntityQuery<>(filter, page, pageSize))
                 .stream()
                 .map(ThinWorkspaceResponse::from)
                 .toList()

@@ -1,7 +1,7 @@
-package org.atlas.workspace.api.dto.request;
+package org.atlas.workspace.api.dto.request.workspace;
 
 import org.atlas.workspace.api.dto.command.PatchValue;
-import org.atlas.workspace.api.dto.command.WorkspaceUpdateCommand;
+import org.atlas.workspace.api.dto.command.workspace.UpdateWorkspaceCommand;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 public record WorkspaceUpdateRequest(
@@ -13,9 +13,9 @@ public record WorkspaceUpdateRequest(
         description = description != null ? description : JsonNullable.undefined();
     }
 
-    public WorkspaceUpdateCommand toCommand() {
+    public UpdateWorkspaceCommand toCommand() {
 
-        return new WorkspaceUpdateCommand(
+        return new UpdateWorkspaceCommand(
                 toPatchValue(name),
                 toPatchValue(description)
         );

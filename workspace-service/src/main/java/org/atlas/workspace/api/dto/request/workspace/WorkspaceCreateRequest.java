@@ -1,6 +1,6 @@
-package org.atlas.workspace.api.dto.request;
+package org.atlas.workspace.api.dto.request.workspace;
 
-import org.atlas.workspace.api.dto.command.CreateWorkspaceCommand;
+import org.atlas.workspace.api.dto.command.workspace.CreateWorkspaceCommand;
 
 public record WorkspaceCreateRequest(
         String name,

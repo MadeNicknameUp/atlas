@@ -1,4 +1,4 @@
-package org.atlas.workspace.api.dto.command;
+package org.atlas.workspace.api.dto.command.workspace;
 
 public record CreateWorkspaceCommand(
         String name,

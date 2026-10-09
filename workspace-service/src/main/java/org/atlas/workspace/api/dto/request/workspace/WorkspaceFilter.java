@@ -1,19 +1,20 @@
-package org.atlas.workspace.api.dto.request;
+package org.atlas.workspace.api.dto.request.workspace;
 
 
-import org.atlas.workspace.store.model.Workspace;
+import org.atlas.workspace.api.dto.request.SearchFilter;
+import org.atlas.workspace.store.domain.Workspace;
 
 import java.time.Instant;
 import java.util.Locale;
 
-public record WorkspaceFilter(
+public record WorkspaceFilter (
         String name,
         String description,
         String state,
         String ownerId,
         Instant from,
         Instant until
-) {
+) implements SearchFilter<Workspace> {
 
     public boolean applyOn(Workspace workspace) {
         if (name != null && !name.isBlank() && (workspace.getName() == null
