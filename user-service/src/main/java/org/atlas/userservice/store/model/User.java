@@ -28,16 +28,19 @@ public class User {
     @Column(name = "identity_subject", nullable = false, unique = true)
     private String identitySubject;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean active = true;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;
 
+    @Builder.Default
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "notification_preferences", columnDefinition = "jsonb", nullable = false)
+    @Column(name = "preferences", columnDefinition = "jsonb", nullable = false)
     private Map<String, Object> preferences = new HashMap<>();
 
+    @Builder.Default
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "notification_preferences", columnDefinition = "jsonb", nullable = false)
     private Map<String, Object> notificationPreferences = new HashMap<>();
@@ -49,4 +52,12 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    public void deactivate() {
+        this.active = false;
+    }
+
+    public void activate() {
+        this.active = true;
+    }
 }

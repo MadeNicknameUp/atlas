@@ -2,6 +2,8 @@ package org.atlas.userservice.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.userservice.api.dto.request.UpdateProfileRequest;
+import org.atlas.userservice.api.exception.unit.NotFoundException;
+import org.atlas.userservice.api.exception.unit.UserDeactivatedException;
 import org.atlas.userservice.store.model.Profile;
 import org.atlas.userservice.store.model.User;
 import org.atlas.userservice.store.repository.UserRepository;
@@ -17,14 +19,15 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
-    public User getBySubject(String subject) {
-        return userRepository.findByIdentitySubject(subject).orElseThrow(() -> new UserNotFoundException(subject));
+    /** GET /me: деактивированный пользователь читать свои данные может (active=false в ответе). */
+    @Transactional
+    public User getMe(String subject) {
+        return findOrCreate(subject);
     }
 
     @Transactional
     public User updateProfile(String subject, UpdateProfileRequest req) {
-        User user = getBySubject(subject);
+        User user = findActiveOrCreate(subject);
 
         Profile profile = user.getProfile();
         if (profile == null) {
@@ -44,20 +47,55 @@ public class UserService {
 
     @Transactional
     public User updatePreferences(String subject, Map<String, Object> patch) {
-        User user = getBySubject(subject);
+        User user = findActiveOrCreate(subject);
         user.setPreferences(merge(user.getPreferences(), patch));
         return user;
     }
 
     @Transactional
     public User updateNotificationPreferences(String subject, Map<String, Object> patch) {
-        User user = getBySubject(subject);
+        User user = findActiveOrCreate(subject);
         user.setNotificationPreferences(merge(user.getNotificationPreferences(), patch));
         return user;
     }
 
+    @Transactional
+    public User deactivate(String subject) {
+        User user = getBySubject(subject);
+        user.deactivate();
+        return user;
+    }
+
+    @Transactional
+    public User activate(String subject) {
+        User user = getBySubject(subject);
+        user.activate();
+        return user;
+    }
+
+    @Transactional(readOnly = true)
+    public User getBySubject(String subject) {
+        return userRepository.findByIdentitySubject(subject)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+    }
+
+    // TODO(auth): когда появится identity-провайдер, пользователя можно создавать там/по событию
+    private User findOrCreate(String subject) {
+        return userRepository.findByIdentitySubject(subject)
+                .orElseGet(() -> userRepository.save(
+                        User.builder().identitySubject(subject).build()));
+    }
+
+    private User findActiveOrCreate(String subject) {
+        User user = findOrCreate(subject);
+        if (!user.isActive()) {
+            throw new UserDeactivatedException("User is deactivated");
+        }
+        return user;
+    }
+
     private Map<String, Object> merge(Map<String, Object> current, Map<String, Object> patch) {
-        Map<String, Object> result = new HashMap<>(current);
+        Map<String, Object> result = current == null ? new HashMap<>() : new HashMap<>(current);
         patch.forEach((k, v) -> {
             if (v == null) result.remove(k);
             else result.put(k, v);

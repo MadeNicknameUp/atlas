@@ -4,81 +4,108 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.userservice.api.exception.dto.ExceptionResponse;
 import org.atlas.userservice.api.exception.unit.NotFoundException;
+import org.atlas.userservice.api.exception.unit.UserDeactivatedException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.stream.Collectors;
 
+/**
+ * Наследуемся от ResponseEntityExceptionHandler: он уже знает про стандартные исключения Spring MVC
+ * (405, 415, 404 на несуществующий путь, отсутствующий параметр и т.д.), а мы лишь приводим
+ * их ответ к единому формату ExceptionResponse(code, message, path).
+ */
 @Slf4j
 @RestControllerAdvice
-public class UserExceptionHandler {
+public class UserExceptionHandler extends ResponseEntityExceptionHandler {
+
+    // ---- наши исключения ----
 
     // 404
-    @ExceptionHandler(value = { NotFoundException.class })
-    public ResponseEntity<ExceptionResponse> handleNotFoundException(
-            HttpServletRequest request,
-            NotFoundException exception
-    ) {
-        log.warn("{}: {}. Happened on: {}.",
-                exception.getClass().getSimpleName(),
-                exception.getMessage(),
-                request.getRequestURI()
-        );
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Object> handleNotFound(HttpServletRequest request, NotFoundException ex) {
+        log.warn("NotFoundException: {}. Happened on: {}.", ex.getMessage(), request.getRequestURI());
+        return build(HttpStatus.NOT_FOUND, null, ex.getMessage(), request.getRequestURI());
+    }
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(new ExceptionResponse(
-                        HttpStatus.NOT_FOUND.value(),
-                        exception.getMessage(),
-                        request.getRequestURI()
-                ));
+    // 403
+    @ExceptionHandler(UserDeactivatedException.class)
+    public ResponseEntity<Object> handleDeactivated(HttpServletRequest request, UserDeactivatedException ex) {
+        log.warn("UserDeactivatedException: {}. Happened on: {}.", ex.getMessage(), request.getRequestURI());
+        return build(HttpStatus.FORBIDDEN, null, ex.getMessage(), request.getRequestURI());
     }
 
     // 400
-    @ExceptionHandler(value = { IllegalArgumentException.class, MethodArgumentNotValidException.class})
-    public ResponseEntity<ExceptionResponse> handleBadRequestException(
-            HttpServletRequest request,
-            MethodArgumentNotValidException exception
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgument(HttpServletRequest request, IllegalArgumentException ex) {
+        log.warn("IllegalArgumentException: {}. Happened on: {}.", ex.getMessage(), request.getRequestURI());
+        return build(HttpStatus.BAD_REQUEST, null, ex.getMessage(), request.getRequestURI());
+    }
+
+    // 500: всё остальное
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleOther(HttpServletRequest request, Exception ex) {
+        log.error("Unexpected error on {}", request.getRequestURI(), ex);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, null, "Unexpected server error", request.getRequestURI());
+    }
+
+    // ---- переопределения стандартных исключений Spring MVC ----
+
+    // 400: @Valid не прошла
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request
     ) {
-        String message = exception.getBindingResult().getFieldErrors().stream()
+        String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(e -> e.getField() + ": " + e.getDefaultMessage())
                 .collect(Collectors.joining("; "));
-
-        log.warn("Validation failed on {}: {}", request.getRequestURI(), message);
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ExceptionResponse(HttpStatus.BAD_REQUEST.value(), message, request.getRequestURI()));
-    }
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionResponse> handleUnreadable(HttpServletRequest request, HttpMessageNotReadableException exception) {
-        log.warn("Unreadable body on {}: {}", request.getRequestURI(), exception.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ExceptionResponse(400, "Request body is missing or is not valid JSON", request.getRequestURI()));
+        String path = path(request);
+        log.warn("Validation failed on {}: {}", path, message);
+        return build(status, headers, message, path);
     }
 
-    // 500
-    @ExceptionHandler(value = { Exception.class })
-    public ResponseEntity<ExceptionResponse> handleOtherException(
-            HttpServletRequest request,
-            Exception exception
+    // 400: тело отсутствует или невалидный JSON
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request
     ) {
-        log.error("{}: {}. Happened on: {}.",
-                exception.getClass().getSimpleName(),
-                exception.getMessage(),
-                request.getRequestURI()
-        );
+        String path = path(request);
+        log.warn("Unreadable body on {}: {}", path, ex.getMessage());
+        return build(status, headers, "Request body is missing or is not valid JSON", path);
+    }
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ExceptionResponse(
-                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        "Unexpected server error",
-                        request.getRequestURI()
-                ));
+    // 404 (нет такого пути), 405, 415 и остальные: единый формат
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request
+    ) {
+        String message = (body instanceof ProblemDetail pd && pd.getDetail() != null)
+                ? pd.getDetail()
+                : ex.getMessage();
+        String path = path(request);
+        log.warn("{}: {}. Happened on: {}.", ex.getClass().getSimpleName(), message, path);
+        return build(statusCode, headers, message, path);
+    }
+
+    // ---- helpers ----
+
+    private static ResponseEntity<Object> build(HttpStatusCode status, HttpHeaders headers, String message, String path) {
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(status);
+        if (headers != null) builder.headers(headers);
+        return builder.body(new ExceptionResponse(status.value(), message, path));
+    }
+
+    private static String path(WebRequest request) {
+        return request instanceof ServletWebRequest swr ? swr.getRequest().getRequestURI() : "";
     }
 }

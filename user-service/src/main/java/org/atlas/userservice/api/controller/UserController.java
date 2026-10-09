@@ -6,8 +6,6 @@ import org.atlas.userservice.api.dto.request.UpdateProfileRequest;
 import org.atlas.userservice.api.dto.response.UserResponse;
 import org.atlas.userservice.api.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -17,37 +15,41 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
 
+    // TODO(auth): заменить заголовок на @AuthenticationPrincipal Jwt jwt -> jwt.getSubject(),
+    //  когда появится identity-провайдер. Остальной код менять не нужно.
+    private static final String SUBJECT_HEADER = "X-Subject";
+    private static final String DEV_SUBJECT = "dev-user";
+
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(UserResponse.from(userService.getBySubject(jwt.getSubject())));
+    public ResponseEntity<UserResponse> getMe(
+            @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject
+    ) {
+        return ResponseEntity.ok(UserResponse.from(userService.getMe(subject)));
     }
 
     @PatchMapping("/profile")
     public ResponseEntity<UserResponse> updateProfile(
-            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject,
             @Valid @RequestBody UpdateProfileRequest request
     ) {
-        return ResponseEntity.ok(UserResponse.from(
-                userService.updateProfile(jwt.getSubject(), request)));
+        return ResponseEntity.ok(UserResponse.from(userService.updateProfile(subject, request)));
     }
 
     @PatchMapping("/preferences")
     public ResponseEntity<UserResponse> updatePreferences(
-            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject,
             @RequestBody Map<String, Object> request
     ) {
-        return ResponseEntity.ok(UserResponse.from(
-                userService.updatePreferences(jwt.getSubject(), request)));
+        return ResponseEntity.ok(UserResponse.from(userService.updatePreferences(subject, request)));
     }
 
     @PatchMapping("/notification-preferences")
     public ResponseEntity<UserResponse> updateNotificationPreferences(
-            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject,
             @RequestBody Map<String, Object> request
     ) {
-        return ResponseEntity.ok(UserResponse.from(
-                userService.updateNotificationPreferences(jwt.getSubject(), request)));
+        return ResponseEntity.ok(UserResponse.from(userService.updateNotificationPreferences(subject, request)));
     }
 }
