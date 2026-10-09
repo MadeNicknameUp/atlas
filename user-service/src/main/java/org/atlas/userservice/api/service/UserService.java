@@ -19,7 +19,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    /** GET /me: деактивированный пользователь читать свои данные может (active=false в ответе). */
+    /** GET /me: active=false */
     @Transactional
     public User getMe(String subject) {
         return findOrCreate(subject);
@@ -100,6 +100,6 @@ public class UserService {
             if (v == null) result.remove(k);
             else result.put(k, v);
         });
-        return result;   // новая Map, чтобы Hibernate точно увидел изменение
+        return result;
     }
 }

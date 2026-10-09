@@ -20,16 +20,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.stream.Collectors;
 
-/**
- * Наследуемся от ResponseEntityExceptionHandler: он уже знает про стандартные исключения Spring MVC
- * (405, 415, 404 на несуществующий путь, отсутствующий параметр и т.д.), а мы лишь приводим
- * их ответ к единому формату ExceptionResponse(code, message, path).
- */
 @Slf4j
 @RestControllerAdvice
 public class UserExceptionHandler extends ResponseEntityExceptionHandler {
-
-    // ---- наши исключения ----
 
     // 404
     @ExceptionHandler(NotFoundException.class)
@@ -52,16 +45,15 @@ public class UserExceptionHandler extends ResponseEntityExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, null, ex.getMessage(), request.getRequestURI());
     }
 
-    // 500: всё остальное
+    // 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleOther(HttpServletRequest request, Exception ex) {
         log.error("Unexpected error on {}", request.getRequestURI(), ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, null, "Unexpected server error", request.getRequestURI());
     }
 
-    // ---- переопределения стандартных исключений Spring MVC ----
-
-    // 400: @Valid не прошла
+    // Spring MVC
+    // 400
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request
@@ -74,7 +66,7 @@ public class UserExceptionHandler extends ResponseEntityExceptionHandler {
         return build(status, headers, message, path);
     }
 
-    // 400: тело отсутствует или невалидный JSON
+    // 400
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request
@@ -84,7 +76,7 @@ public class UserExceptionHandler extends ResponseEntityExceptionHandler {
         return build(status, headers, "Request body is missing or is not valid JSON", path);
     }
 
-    // 404 (нет такого пути), 405, 415 и остальные: единый формат
+    // 404
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request
