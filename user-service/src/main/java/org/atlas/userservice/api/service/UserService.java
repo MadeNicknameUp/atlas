@@ -22,12 +22,12 @@ public class UserService {
     /** GET /me: active=false */
     @Transactional
     public User getMe(String subject) {
-        return findOrCreate(subject);
+        return find(subject);
     }
 
     @Transactional
     public User updateProfile(String subject, UpdateProfileRequest req) {
-        User user = findActiveOrCreate(subject);
+        User user = findActive(subject);
 
         Profile profile = user.getProfile();
         if (profile == null) {
@@ -47,47 +47,33 @@ public class UserService {
 
     @Transactional
     public User updatePreferences(String subject, Map<String, Object> patch) {
-        User user = findActiveOrCreate(subject);
+        User user = findActive(subject);
         user.setPreferences(merge(user.getPreferences(), patch));
         return user;
     }
 
     @Transactional
     public User updateNotificationPreferences(String subject, Map<String, Object> patch) {
-        User user = findActiveOrCreate(subject);
+        User user = findActive(subject);
         user.setNotificationPreferences(merge(user.getNotificationPreferences(), patch));
         return user;
     }
 
     @Transactional
     public User deactivate(String subject) {
-        User user = getBySubject(subject);
+        User user = find(subject);
         user.deactivate();
         return user;
     }
 
-    @Transactional
-    public User activate(String subject) {
-        User user = getBySubject(subject);
-        user.activate();
-        return user;
-    }
-
     @Transactional(readOnly = true)
-    public User getBySubject(String subject) {
+    private User find(String subject) {
         return userRepository.findByIdentitySubject(subject)
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
-    // TODO(auth): когда появится identity-провайдер, пользователя можно создавать там/по событию
-    private User findOrCreate(String subject) {
-        return userRepository.findByIdentitySubject(subject)
-                .orElseGet(() -> userRepository.save(
-                        User.builder().identitySubject(subject).build()));
-    }
-
-    private User findActiveOrCreate(String subject) {
-        User user = findOrCreate(subject);
+    private User findActive(String subject) {
+        User user = find(subject);
         if (!user.isActive()) {
             throw new UserDeactivatedException("User is deactivated");
         }
