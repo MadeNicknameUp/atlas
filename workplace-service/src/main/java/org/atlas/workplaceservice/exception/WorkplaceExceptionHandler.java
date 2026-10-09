@@ -79,7 +79,7 @@ public class WorkplaceExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ExceptionResponse(
                         HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        exception.getMessage(),
+                        "Error occurred. Please contact support or try again later.",
                         request.getRequestURI()
                 ));
     }

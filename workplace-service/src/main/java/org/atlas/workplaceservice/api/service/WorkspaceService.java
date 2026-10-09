@@ -2,6 +2,7 @@ package org.atlas.workplaceservice.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.workplaceservice.api.dto.command.CreateWorkspaceCommand;
+import org.atlas.workplaceservice.api.dto.command.FindWorkspacesQuery;
 import org.atlas.workplaceservice.api.dto.command.PatchValue;
 import org.atlas.workplaceservice.api.dto.command.WorkspaceUpdateCommand;
 import org.atlas.workplaceservice.exception.unit.NotFoundException;
@@ -10,6 +11,8 @@ import org.atlas.workplaceservice.store.model.Member;
 import org.atlas.workplaceservice.store.model.Workspace;
 import org.atlas.workplaceservice.store.repository.MemberRepository;
 import org.atlas.workplaceservice.store.repository.WorkspaceRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +42,7 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
 
-        // This has to be replaced with smth more efficient later.
+        // This has until be replaced with smth more efficient later.
         if (workspace.getMembers().stream().noneMatch(member -> member.getUserId().equals(userId))) {
             throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
         }
@@ -47,12 +50,18 @@ public class WorkspaceService {
         return workspace;
     }
 
-    public List<Workspace> getWorkplacesByUserId(UUID memberId) {
+    public List<Workspace> getWorkplacesByUserId(UUID memberId, FindWorkspacesQuery query) {
+
+        Pageable page = PageRequest.of(
+                (query.page() == null || query.page() < 0) ? 0 : query.page(),
+                (query.pageSize() == null || query.pageSize() < 0)? 25 : query.pageSize()
+        );
 
         return memberRepository
-                .findAllByUserId(memberId)
+                .findAllByUserId(memberId, page)
                 .stream()
                 .map(Member::getWorkplace)
+                .filter(w -> query.filter().applyOn(w))
                 .toList();
     }
 
@@ -62,7 +71,7 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
 
-        // This has to be A: Changed later. B: Depend on workspace settings.
+        // This has until be A: Changed later. B: Depend on workspace settings.
         if(!workspace.getOwnerId().equals(userId)) {
             throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
         }

@@ -1,7 +1,9 @@
 package org.atlas.workplaceservice.api.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.atlas.workplaceservice.api.dto.command.FindWorkspacesQuery;
 import org.atlas.workplaceservice.api.dto.request.WorkspaceCreateRequest;
+import org.atlas.workplaceservice.api.dto.request.WorkspaceFilter;
 import org.atlas.workplaceservice.api.dto.request.WorkspaceUpdateRequest;
 import org.atlas.workplaceservice.api.dto.response.ThinWorkspaceResponse;
 import org.atlas.workplaceservice.api.dto.response.WorkspaceCreatedResponse;
@@ -39,14 +41,18 @@ public class WorkspaceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThickWorkspaceResponse>> getWorkplaces() {
+    public ResponseEntity<List<ThinWorkspaceResponse>> getWorkplaces(
+            @ModelAttribute WorkspaceFilter filter,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false, name = "page_size") Integer pageSize
+    ) {
 
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
         return ResponseEntity.ok(workspaceService
-                .getWorkplacesByUserId(userId)
+                .getWorkplacesByUserId(userId, new FindWorkspacesQuery(filter, page, pageSize))
                 .stream()
-                .map(ThickWorkspaceResponse::from)
+                .map(ThinWorkspaceResponse::from)
                 .toList()
         );
     }
