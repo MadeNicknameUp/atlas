@@ -1,6 +1,7 @@
 package org.atlas.workspace.api.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import org.atlas.workspace.api.dto.command.FindWorkspacesQuery;
 import org.atlas.workspace.api.dto.request.WorkspaceCreateRequest;
@@ -45,7 +46,7 @@ public class WorkspaceController {
     public ResponseEntity<List<ThinWorkspaceResponse>> getWorkspaces(
             @ModelAttribute WorkspaceFilter filter,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false, name = "page_size") Integer pageSize
+            @RequestParam(required = false, name = "page_size") @Max(300) Integer pageSize
     ) {
 
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
@@ -74,7 +75,7 @@ public class WorkspaceController {
     @PatchMapping("/{workspaceId}")
     public ResponseEntity<ThinWorkspaceResponse> updateWorkspace(
             @PathVariable UUID workspaceId,
-            @RequestBody WorkspaceUpdateRequest request
+            @RequestBody @Valid WorkspaceUpdateRequest request
     ) {
 
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");

@@ -4,6 +4,7 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.atlas.workspace.store.model.Member;
 import org.atlas.workspace.store.model.Workspace;
+import org.atlas.workspace.store.model.WorkspaceState;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.Instant;
@@ -60,7 +61,7 @@ public class SpecificationUtils {
                 return null;
             }
 
-            return cb.equal(cb.lower(root.get("state")), state.toLowerCase(Locale.ROOT));
+            return cb.equal(cb.lower(root.get("state")), WorkspaceState.valueOf(state));
         };
     }
 
@@ -72,7 +73,7 @@ public class SpecificationUtils {
                 return null;
             }
 
-            return cb.equal(cb.lower(root.get("ownerId").get("userId")), ownerId.toLowerCase(Locale.ROOT));
+            return cb.equal(cb.lower(root.get("owner").get("userId")), ownerId.toLowerCase(Locale.ROOT));
         };
     }
 

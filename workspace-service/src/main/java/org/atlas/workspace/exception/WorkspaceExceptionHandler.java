@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -49,7 +50,10 @@ public class WorkspaceExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+    @ExceptionHandler(value = {
+            MethodArgumentNotValidException.class,
+            HandlerMethodValidationException.class
+    })
     public ResponseEntity<ExceptionResponse> handleValidationException(
             HttpServletRequest request,
             MethodArgumentNotValidException exception

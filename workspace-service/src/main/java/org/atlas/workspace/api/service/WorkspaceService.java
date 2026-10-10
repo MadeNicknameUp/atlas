@@ -38,14 +38,8 @@ public class WorkspaceService {
 
     public Workspace getWorkspaceById(UUID userId, UUID workspaceId) {
 
-        Workspace workspace = workspaceRepository.findByIdWithMembers(workspaceId)
+        return workspaceRepository.findByIdAndMembersUserId(workspaceId, userId)
                 .orElseThrow(() -> new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId)));
-
-        if (!workspace.getOwner().getUserId().equals(userId)) {
-            throw new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId));
-        }
-
-        return workspace;
     }
 
     public List<Workspace> getWorkspacesByUserId(UUID userId, FindWorkspacesQuery query) {
