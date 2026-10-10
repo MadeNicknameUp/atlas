@@ -7,6 +7,7 @@ import org.atlas.workspace.exception.unit.NotFoundException;
 import org.atlas.workspace.exception.unit.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -32,7 +33,7 @@ public class WorkplaceExceptionHandler {
     }
 
     @ExceptionHandler(value = { ValidationException.class })
-    public ResponseEntity<ExceptionResponse> handleValidationException(
+    public ResponseEntity<ExceptionResponse> handleCustomValidationException(
             HttpServletRequest request,
             ValidationException exception
     ) {
@@ -44,6 +45,23 @@ public class WorkplaceExceptionHandler {
                 .body(new ExceptionResponse(
                         HttpStatus.BAD_REQUEST.value(),
                         exception.getMessage(),
+                        request.getRequestURI()
+                ));
+    }
+
+    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+    public ResponseEntity<ExceptionResponse> handleValidationException(
+            HttpServletRequest request,
+            MethodArgumentNotValidException exception
+    ) {
+
+        logWarning(request, exception);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "ValidationException: Provided argument violates validation constraints.",
                         request.getRequestURI()
                 ));
     }
@@ -60,7 +78,7 @@ public class WorkplaceExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponse(
                         HttpStatus.BAD_REQUEST.value(),
-                        exception.getMessage(),
+                        "Invariant violation: This action may not be performed due to resource's current state or an illegal input.",
                         request.getRequestURI()
                 ));
     }

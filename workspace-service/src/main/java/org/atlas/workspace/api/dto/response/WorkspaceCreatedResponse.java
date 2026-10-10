@@ -9,6 +9,9 @@ import java.util.UUID;
 
 public record WorkspaceCreatedResponse(
         UUID workplaceId,
+        String name,
+        String iconUrl,
+        String description,
         UUID ownerId,
         List<UUID> memberIds,
         Instant createdAt
@@ -18,6 +21,9 @@ public record WorkspaceCreatedResponse(
 
         return new WorkspaceCreatedResponse(
                 workplace.getId(),
+                workplace.getName(),
+                workplace.getIconUrl(),
+                workplace.getDescription(),
                 workplace.getOwner().getUserId(),
                 workplace.getMembers()
                         .stream()

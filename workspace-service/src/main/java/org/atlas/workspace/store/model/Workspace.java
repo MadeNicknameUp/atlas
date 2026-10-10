@@ -25,8 +25,10 @@ public class Workspace {
     @Column(nullable = false)
     private String name;
 
+    @Column(columnDefinition = "TEXT")
     private String iconUrl;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private WorkspaceState state;

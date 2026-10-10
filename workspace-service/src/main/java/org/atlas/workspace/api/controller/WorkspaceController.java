@@ -1,5 +1,6 @@
 package org.atlas.workspace.api.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.atlas.workspace.api.dto.command.FindWorkspacesQuery;
 import org.atlas.workspace.api.dto.request.WorkspaceCreateRequest;
@@ -25,7 +26,7 @@ public class WorkspaceController {
 
     @PostMapping
     public ResponseEntity<WorkspaceCreatedResponse> createWorkplace(
-            @RequestBody WorkspaceCreateRequest request
+            @RequestBody @Valid WorkspaceCreateRequest request
     ) {
 
         UUID ownerId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
