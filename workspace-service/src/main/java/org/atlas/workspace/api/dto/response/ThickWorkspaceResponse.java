@@ -27,7 +27,7 @@ public record ThickWorkspaceResponse(
                 workspace.getIconUrl(),
                 workspace.getDescription(),
                 workspace.getState().toString(),
-                workspace.getOwner().getUserId(),
+                workspace.getOwnerId(),
                 workspace.getMembers()
                         .stream()
                         .map(Member::getId)

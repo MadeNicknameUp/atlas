@@ -24,7 +24,7 @@ public record WorkspaceCreatedResponse(
                 workspace.getName(),
                 workspace.getIconUrl(),
                 workspace.getDescription(),
-                workspace.getOwner().getUserId(),
+                workspace.getOwnerId(),
                 workspace.getMembers()
                         .stream()
                         .map(Member::getId)

@@ -35,9 +35,8 @@ public class Workspace {
     @Enumerated(EnumType.STRING)
     private WorkspaceState state;
 
-    @OneToOne(optional = false, cascade = CascadeType.ALL)
-    @JoinColumn(name = "owner_id")
-    private Member owner;
+    @Column(nullable = false)
+    private UUID ownerId;
 
     @OneToMany(
             mappedBy = "workspace",
@@ -60,8 +59,8 @@ public class Workspace {
         workspace.setName(name);
         workspace.setIconUrl(iconUrl);
         workspace.setDescription(description);
-        workspace.owner = new Member(ownerId, MemberRole.OWNER, workspace);
-        workspace.getMembers().add(workspace.owner);
+        workspace.ownerId = ownerId;
+        workspace.getMembers().add(new Member(ownerId, MemberRole.OWNER, workspace));
         workspace.state = WorkspaceState.ACTIVE;
 
         return workspace;

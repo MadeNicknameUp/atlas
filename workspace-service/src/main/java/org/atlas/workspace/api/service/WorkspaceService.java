@@ -73,7 +73,7 @@ public class WorkspaceService {
                 .orElseThrow(() -> new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId)));
 
         // This has to depend on workspace settings.
-        if(!workspace.getOwner().getUserId().equals(userId)) {
+        if(!workspace.getOwnerId().equals(userId)) {
             throw new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId));
         }
 
@@ -105,7 +105,7 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId)));
 
-        if(!workspace.getOwner().getUserId().equals(userId)) {
+        if(!workspace.getOwnerId().equals(userId)) {
             throw new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId));
         }
 
