@@ -70,14 +70,14 @@ public class WorkspaceController {
     }
 
     @PatchMapping("/{workspaceId}")
-    public ResponseEntity<ThickWorkspaceResponse> updateWorkspace(
+    public ResponseEntity<ThinWorkspaceResponse> updateWorkspace(
             @PathVariable UUID workspaceId,
             @RequestBody WorkspaceUpdateRequest request
     ) {
 
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
-        return ResponseEntity.ok(ThickWorkspaceResponse.from(
+        return ResponseEntity.ok(ThinWorkspaceResponse.from(
                 workspaceService.updateWorkspace(userId, workspaceId, request.toCommand())
         ));
     }

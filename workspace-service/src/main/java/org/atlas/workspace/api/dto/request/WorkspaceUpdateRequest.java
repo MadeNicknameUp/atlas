@@ -6,18 +6,21 @@ import org.openapitools.jackson.nullable.JsonNullable;
 
 public record WorkspaceUpdateRequest(
         JsonNullable<String> name,
-        JsonNullable<String> description
+        JsonNullable<String> description,
+        JsonNullable<String> iconUrl
 ) {
     public WorkspaceUpdateRequest {
         name = name != null ? name : JsonNullable.undefined();
         description = description != null ? description : JsonNullable.undefined();
+        iconUrl = iconUrl != null ? iconUrl : JsonNullable.undefined();
     }
 
     public WorkspaceUpdateCommand toCommand() {
 
         return new WorkspaceUpdateCommand(
                 toPatchValue(name),
-                toPatchValue(description)
+                toPatchValue(description),
+                toPatchValue(iconUrl)
         );
     }
 

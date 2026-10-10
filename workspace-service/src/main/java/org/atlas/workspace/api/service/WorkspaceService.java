@@ -88,6 +88,13 @@ public class WorkspaceService {
             case PatchValue.Clear<String> _ -> workspace.clearDescription();
         }
 
+        switch (workspaceUpdateCommand.description()){
+            case PatchValue.Unchanged<String> _ -> {}
+            case PatchValue.Set<String> value -> workspace.updateIcon(value.value());
+            case PatchValue.Clear<String> _ -> workspace.removeIcon();
+        }
+
+
         return workspaceRepository.save(workspace);
     }
 

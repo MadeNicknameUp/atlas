@@ -86,4 +86,12 @@ public class Workspace {
 
         state = WorkspaceState.ARCHIVED;
     }
+
+    public void updateIcon(String value) {
+        this.iconUrl = value;
+    }
+
+    public void removeIcon() {
+        this.iconUrl = null;
+    }
 }
