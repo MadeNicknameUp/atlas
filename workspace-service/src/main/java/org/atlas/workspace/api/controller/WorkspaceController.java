@@ -58,13 +58,13 @@ public class WorkspaceController {
     }
 
     @GetMapping("/{workspaceId}")
-    public ResponseEntity<ThinWorkspaceResponse> getWorkplace(
+    public ResponseEntity<ThickWorkspaceResponse> getWorkplace(
             @PathVariable("workspaceId") UUID workspaceId
     ) {
 
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
-        return ResponseEntity.ok(ThinWorkspaceResponse.from(
+        return ResponseEntity.ok(ThickWorkspaceResponse.from(
                 workspaceService.getWorkplaceById(userId, workspaceId)
         ));
     }

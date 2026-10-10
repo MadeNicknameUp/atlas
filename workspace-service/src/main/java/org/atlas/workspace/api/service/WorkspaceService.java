@@ -39,7 +39,7 @@ public class WorkspaceService {
 
     public Workspace getWorkplaceById(UUID userId, UUID workspaceId) {
 
-        Workspace workspace = workspaceRepository.findById(workspaceId)
+        Workspace workspace = workspaceRepository.findByIdWithMembers(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
 
         // This has until be replaced with smth more efficient later.

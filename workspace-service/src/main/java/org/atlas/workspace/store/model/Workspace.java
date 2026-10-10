@@ -62,6 +62,11 @@ public class Workspace {
     }
 
     public void rename(@NonNull String newName) {
+
+        if (newName.isBlank()) {
+            throw new IllegalArgumentException("Name may not be empty.");
+        }
+
         this.name = newName;
     }
 

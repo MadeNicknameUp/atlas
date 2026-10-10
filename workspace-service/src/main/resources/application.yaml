@@ -6,7 +6,7 @@ spring:
     property-naming-strategy: SNAKE_CASE
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/workplace_db
+    url: jdbc:postgresql://localhost:5433/workspace_db
     username: admin
     password: admin
     driver-class-name: org.postgresql.Driver
