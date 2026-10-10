@@ -5,14 +5,14 @@ import org.atlas.workspace.api.dto.command.CreateWorkspaceCommand;
 import org.atlas.workspace.api.dto.command.FindWorkspacesQuery;
 import org.atlas.workspace.api.dto.command.PatchValue;
 import org.atlas.workspace.api.dto.command.WorkspaceUpdateCommand;
+import org.atlas.workspace.api.util.SpecificationUtils;
 import org.atlas.workspace.exception.unit.NotFoundException;
 import org.atlas.workspace.exception.unit.ValidationException;
-import org.atlas.workspace.store.model.Member;
 import org.atlas.workspace.store.model.Workspace;
-import org.atlas.workspace.store.repository.MemberRepository;
 import org.atlas.workspace.store.repository.WorkspaceRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +24,6 @@ import java.util.UUID;
 public class WorkspaceService {
 
     private final WorkspaceRepository workspaceRepository;
-    private final MemberRepository memberRepository;
 
     @Transactional
     public Workspace createWorkspace(UUID ownerId, CreateWorkspaceCommand createWorkspaceCommand) {
@@ -49,19 +48,28 @@ public class WorkspaceService {
         return workspace;
     }
 
-    public List<Workspace> getWorkspacesByUserId(UUID memberId, FindWorkspacesQuery query) {
+    public List<Workspace> getWorkspacesByUserId(UUID userId, FindWorkspacesQuery query) {
 
         Pageable page = PageRequest.of(
                 (query.page() == null || query.page() < 0) ? 0 : query.page(),
                 (query.pageSize() == null || query.pageSize() <= 0)? 25 : query.pageSize()
         );
 
-        return memberRepository
-                .findAllByUserId(memberId, page)
-                .stream()
-                .map(Member::getWorkspace)
-                .filter(w -> query.filter().applyOn(w))
-                .toList();
+        Specification<Workspace> specification = SpecificationUtils.containsUserId(userId);
+
+        specification = specification.and(SpecificationUtils.hasNameLike(query.filter().name()));
+        specification = specification.and(SpecificationUtils.hasDescriptionLike(query.filter().description()));
+        specification = specification.and(SpecificationUtils.hasStateEqual(query.filter().state()));
+        specification = specification.and(SpecificationUtils.hasOwnerEqual(query.filter().ownerId()));
+        specification = specification.and(SpecificationUtils.isLaterThen(query.filter().from()));
+        specification = specification.and(SpecificationUtils.isEarlierThen(query.filter().until()));
+
+        // Step 1: Get all workspaces that user is a part of.
+        // Step 2: Filter these workspaces according to the provided filter (specification).
+        // Step 3: Return only matching workspaces in pages.
+        return workspaceRepository
+                .findAll(specification, page)
+                .getContent();
     }
 
     @Transactional
