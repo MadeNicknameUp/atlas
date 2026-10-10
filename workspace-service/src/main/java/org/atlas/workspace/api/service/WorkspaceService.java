@@ -42,8 +42,7 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findByIdWithMembers(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
 
-        // This has until be replaced with smth more efficient later.
-        if (workspace.getMembers().stream().noneMatch(member -> member.getUserId().equals(userId))) {
+        if (!workspace.getOwner().getUserId().equals(userId)) {
             throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
         }
 
@@ -71,8 +70,8 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
 
-        // This has until be A: Changed later. B: Depend on workspace settings.
-        if(!workspace.getOwnerId().equals(userId)) {
+        // This has to depend on workspace settings.
+        if(!workspace.getOwner().getUserId().equals(userId)) {
             throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
         }
 
@@ -84,13 +83,13 @@ public class WorkspaceService {
 
         switch (workspaceUpdateCommand.description()){
             case PatchValue.Unchanged<String> _ -> {}
-            case PatchValue.Set<String> value -> workspace.updateDescription(value.value());
+            case PatchValue.Set<String> value -> workspace.modifyDescription(value.value());
             case PatchValue.Clear<String> _ -> workspace.clearDescription();
         }
 
         switch (workspaceUpdateCommand.description()){
             case PatchValue.Unchanged<String> _ -> {}
-            case PatchValue.Set<String> value -> workspace.updateIcon(value.value());
+            case PatchValue.Set<String> value -> workspace.modifyIcon(value.value());
             case PatchValue.Clear<String> _ -> workspace.removeIcon();
         }
 
@@ -104,7 +103,7 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
 
-        if(!workspace.getOwnerId().equals(userId)) {
+        if(!workspace.getOwner().getUserId().equals(userId)) {
             throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
         }
 

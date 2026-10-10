@@ -18,7 +18,7 @@ public record WorkspaceCreatedResponse(
 
         return new WorkspaceCreatedResponse(
                 workplace.getId(),
-                workplace.getOwnerId(),
+                workplace.getOwner().getUserId(),
                 workplace.getMembers()
                         .stream()
                         .map(Member::getId)

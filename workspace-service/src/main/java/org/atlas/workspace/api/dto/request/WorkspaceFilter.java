@@ -27,7 +27,7 @@ public record WorkspaceFilter(
         if (state != null && !state.equals(workspace.getState().toString().toUpperCase(Locale.ROOT))) {
             return false;
         }
-        if (ownerId != null && !ownerId.equals(workspace.getOwnerId().toString())) {
+        if (ownerId != null && !ownerId.equals(workspace.getOwner().getUserId().toString())) {
             return false;
         }
         if (from != null && (workspace.getCreatedAt() == null || workspace.getCreatedAt().isAfter(from))) {

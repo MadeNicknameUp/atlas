@@ -22,7 +22,7 @@ public record ThinWorkspaceResponse(
                 workspace.getIconUrl(),
                 workspace.getDescription(),
                 workspace.getState().toString(),
-                workspace.getOwnerId(),
+                workspace.getOwner().getUserId(),
                 workspace.getCreatedAt()
         );
     }

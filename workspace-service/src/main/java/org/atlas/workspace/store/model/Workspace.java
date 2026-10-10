@@ -31,11 +31,9 @@ public class Workspace {
 
     private WorkspaceState state;
 
-    // TODO: Maybe I should make this OneToOne with Member, since Member already has userId.
-    //  If I do it like that, I can make resource level validation more efficient.
-    //  (Required: Evaluate Trade-offs)
-    @Column(nullable = false)
-    private UUID ownerId;
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "owner_id")
+    private Member owner;
 
     @OneToMany(
             cascade = CascadeType.ALL,
@@ -57,8 +55,8 @@ public class Workspace {
         workspace.setName(name);
         workspace.setIconUrl(iconUrl);
         workspace.setDescription(description);
-        workspace.getMembers().add(new Member(ownerId, MemberRole.OWNER, workspace));
-        workspace.ownerId = ownerId;
+        workspace.owner = new Member(ownerId, MemberRole.OWNER, workspace);
+        workspace.getMembers().add(workspace.owner);
         workspace.state = WorkspaceState.ACTIVE;
 
         return workspace;
@@ -68,12 +66,19 @@ public class Workspace {
 
         if (newName.isBlank()) {
             throw new IllegalArgumentException("Name may not be empty.");
+        } else if (state == WorkspaceState.ARCHIVED) {
+            throw new IllegalStateException("Cannot modify archived workspace.");
         }
 
         this.name = newName;
     }
 
-    public void updateDescription(String newDescription) {
+    public void modifyDescription(String newDescription) {
+
+        if (state == WorkspaceState.ARCHIVED) {
+            throw new IllegalStateException("Cannot modify archived workspace.");
+        }
+
         this.description = newDescription;
     }
 
@@ -90,11 +95,21 @@ public class Workspace {
         state = WorkspaceState.ARCHIVED;
     }
 
-    public void updateIcon(String value) {
+    public void modifyIcon(String value) {
+
+        if (state == WorkspaceState.ARCHIVED) {
+            throw new IllegalStateException("Cannot modify archived workspace.");
+        }
+
         this.iconUrl = value;
     }
 
     public void removeIcon() {
+
+        if (state == WorkspaceState.ARCHIVED) {
+            throw new IllegalStateException("Cannot modify archived workspace.");
+        }
+
         this.iconUrl = null;
     }
 }
