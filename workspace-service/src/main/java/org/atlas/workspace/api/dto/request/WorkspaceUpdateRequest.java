@@ -30,7 +30,7 @@ public record WorkspaceUpdateRequest(
             return new PatchValue.Unchanged<>();
         }
 
-        return value.get().isBlank() ?
+        return value.get() == null || value.get().isBlank() ?
                 new PatchValue.Clear<>() :
                 new PatchValue.Set<>(value.get());
 

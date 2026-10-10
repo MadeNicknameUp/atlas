@@ -30,6 +30,7 @@ public class Member {
     private MemberRole role;
 
     @ManyToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH })
+    @JoinColumn(name = "workspace_id")
     private Workspace workspace;
 
     @CreationTimestamp

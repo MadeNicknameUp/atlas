@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
-public class WorkplaceExceptionHandler {
+public class WorkspaceExceptionHandler {
 
     @ExceptionHandler(value = { NotFoundException.class })
     public ResponseEntity<ExceptionResponse> handleNotFoundException(

@@ -37,23 +37,23 @@ public class WorkspaceService {
                 ));
     }
 
-    public Workspace getWorkplaceById(UUID userId, UUID workspaceId) {
+    public Workspace getWorkspaceById(UUID userId, UUID workspaceId) {
 
         Workspace workspace = workspaceRepository.findByIdWithMembers(workspaceId)
-                .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
+                .orElseThrow(() -> new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId)));
 
         if (!workspace.getOwner().getUserId().equals(userId)) {
-            throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
+            throw new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId));
         }
 
         return workspace;
     }
 
-    public List<Workspace> getWorkplacesByUserId(UUID memberId, FindWorkspacesQuery query) {
+    public List<Workspace> getWorkspacesByUserId(UUID memberId, FindWorkspacesQuery query) {
 
         Pageable page = PageRequest.of(
                 (query.page() == null || query.page() < 0) ? 0 : query.page(),
-                (query.pageSize() == null || query.pageSize() < 0)? 25 : query.pageSize()
+                (query.pageSize() == null || query.pageSize() <= 0)? 25 : query.pageSize()
         );
 
         return memberRepository
@@ -68,11 +68,11 @@ public class WorkspaceService {
     public Workspace updateWorkspace(UUID userId, UUID workspaceId, WorkspaceUpdateCommand workspaceUpdateCommand) {
 
         Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
+                .orElseThrow(() -> new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId)));
 
         // This has to depend on workspace settings.
         if(!workspace.getOwner().getUserId().equals(userId)) {
-            throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
+            throw new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId));
         }
 
         switch (workspaceUpdateCommand.name()){
@@ -87,7 +87,7 @@ public class WorkspaceService {
             case PatchValue.Clear<String> _ -> workspace.clearDescription();
         }
 
-        switch (workspaceUpdateCommand.description()){
+        switch (workspaceUpdateCommand.iconUrl()){
             case PatchValue.Unchanged<String> _ -> {}
             case PatchValue.Set<String> value -> workspace.modifyIcon(value.value());
             case PatchValue.Clear<String> _ -> workspace.removeIcon();
@@ -101,10 +101,10 @@ public class WorkspaceService {
     public Workspace archiveWorkspace(UUID userId, UUID workspaceId) {
 
         Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId)));
+                .orElseThrow(() -> new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId)));
 
         if(!workspace.getOwner().getUserId().equals(userId)) {
-            throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
+            throw new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId));
         }
 
         workspace.archive();

@@ -9,7 +9,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - workplace_data:/var/lib/postgresql/data
+      - workspace_data:/var/lib/postgresql/data
 
 volumes:
-  workplace_data:
+  workspace_data:

@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record ThinWorkspaceResponse(
-        UUID workplaceId,
+        UUID workspaceId,
         String name,
         String iconUrl,
         String description,

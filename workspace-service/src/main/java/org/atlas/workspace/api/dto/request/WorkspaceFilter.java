@@ -30,7 +30,7 @@ public record WorkspaceFilter(
         if (ownerId != null && !ownerId.equals(workspace.getOwner().getUserId().toString())) {
             return false;
         }
-        if (from != null && (workspace.getCreatedAt() == null || workspace.getCreatedAt().isAfter(from))) {
+        if (from != null && (workspace.getCreatedAt() == null || !workspace.getCreatedAt().isBefore(from))) {
             return false;
         }
 

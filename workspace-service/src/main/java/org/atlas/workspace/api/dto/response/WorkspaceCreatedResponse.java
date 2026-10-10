@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record WorkspaceCreatedResponse(
-        UUID workplaceId,
+        UUID workspaceId,
         String name,
         String iconUrl,
         String description,
@@ -17,19 +17,19 @@ public record WorkspaceCreatedResponse(
         Instant createdAt
 ) {
 
-    public static WorkspaceCreatedResponse from(Workspace workplace) {
+    public static WorkspaceCreatedResponse from(Workspace workspace) {
 
         return new WorkspaceCreatedResponse(
-                workplace.getId(),
-                workplace.getName(),
-                workplace.getIconUrl(),
-                workplace.getDescription(),
-                workplace.getOwner().getUserId(),
-                workplace.getMembers()
+                workspace.getId(),
+                workspace.getName(),
+                workspace.getIconUrl(),
+                workspace.getDescription(),
+                workspace.getOwner().getUserId(),
+                workspace.getMembers()
                         .stream()
                         .map(Member::getId)
                         .toList(),
-                workplace.getCreatedAt()
+                workspace.getCreatedAt()
         );
     }
 }

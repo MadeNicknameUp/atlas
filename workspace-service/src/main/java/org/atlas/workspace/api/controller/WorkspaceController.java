@@ -18,14 +18,14 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/workplaces")
+@RequestMapping("/api/v1/workspaces")
 @RequiredArgsConstructor
 public class WorkspaceController {
 
     private final WorkspaceService workspaceService;
 
     @PostMapping
-    public ResponseEntity<WorkspaceCreatedResponse> createWorkplace(
+    public ResponseEntity<WorkspaceCreatedResponse> createWorkspace(
             @RequestBody @Valid WorkspaceCreateRequest request
     ) {
 
@@ -42,7 +42,7 @@ public class WorkspaceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThinWorkspaceResponse>> getWorkplaces(
+    public ResponseEntity<List<ThinWorkspaceResponse>> getWorkspaces(
             @ModelAttribute WorkspaceFilter filter,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false, name = "page_size") Integer pageSize
@@ -51,7 +51,7 @@ public class WorkspaceController {
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
         return ResponseEntity.ok(workspaceService
-                .getWorkplacesByUserId(userId, new FindWorkspacesQuery(filter, page, pageSize))
+                .getWorkspacesByUserId(userId, new FindWorkspacesQuery(filter, page, pageSize))
                 .stream()
                 .map(ThinWorkspaceResponse::from)
                 .toList()
@@ -60,14 +60,14 @@ public class WorkspaceController {
 
     // TODO: Should this actually return 'ThickWorkspaceResponse' or should members be fetched via member-oriented endpoint?
     @GetMapping("/{workspaceId}")
-    public ResponseEntity<ThickWorkspaceResponse> getWorkplace(
+    public ResponseEntity<ThickWorkspaceResponse> getWorkspace(
             @PathVariable("workspaceId") UUID workspaceId
     ) {
 
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
         return ResponseEntity.ok(ThickWorkspaceResponse.from(
-                workspaceService.getWorkplaceById(userId, workspaceId)
+                workspaceService.getWorkspaceById(userId, workspaceId)
         ));
     }
 

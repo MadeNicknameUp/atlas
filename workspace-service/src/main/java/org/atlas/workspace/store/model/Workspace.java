@@ -1,6 +1,7 @@
 package org.atlas.workspace.store.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -31,6 +32,7 @@ public class Workspace {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     private WorkspaceState state;
 
     @OneToOne(optional = false, cascade = CascadeType.ALL)
@@ -38,6 +40,7 @@ public class Workspace {
     private Member owner;
 
     @OneToMany(
+            mappedBy = "workspace",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY
@@ -64,7 +67,7 @@ public class Workspace {
         return workspace;
     }
 
-    public void rename(@NonNull String newName) {
+    public void rename(@NotBlank String newName) {
 
         if (newName.isBlank()) {
             throw new IllegalArgumentException("Name may not be empty.");
@@ -85,6 +88,11 @@ public class Workspace {
     }
 
     public void clearDescription() {
+
+        if (state == WorkspaceState.ARCHIVED) {
+            throw new IllegalStateException("Workspace with id: %s is already archived.".formatted(this.id));
+        }
+
         description = "";
     }
 

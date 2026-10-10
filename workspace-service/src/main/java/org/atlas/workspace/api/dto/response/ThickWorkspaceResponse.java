@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record ThickWorkspaceResponse(
-        UUID workplaceId,
+        UUID workspaceId,
         String name,
         String iconUrl,
         String description,
