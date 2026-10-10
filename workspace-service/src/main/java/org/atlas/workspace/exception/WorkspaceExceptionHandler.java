@@ -2,7 +2,10 @@ package org.atlas.workspace.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.workspace.exception.dto.BackendExceptionResponse;
+import org.atlas.workspace.exception.dto.ValidationExceptionDetails;
 import org.atlas.workspace.exception.dto.ExceptionResponse;
+import org.atlas.workspace.exception.dto.ValidationExceptionResponse;
 import org.atlas.workspace.exception.unit.NotFoundException;
 import org.atlas.workspace.exception.unit.ValidationException;
 import org.springframework.http.HttpStatus;
@@ -11,6 +14,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+
+import java.util.List;
 
 @Slf4j
 @RestControllerAdvice
@@ -26,7 +31,7 @@ public class WorkspaceExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(new ExceptionResponse(
+                .body(new BackendExceptionResponse(
                         HttpStatus.NOT_FOUND.value(),
                         exception.getMessage(),
                         request.getRequestURI()
@@ -43,7 +48,7 @@ public class WorkspaceExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ExceptionResponse(
+                .body(new BackendExceptionResponse(
                         HttpStatus.BAD_REQUEST.value(),
                         exception.getMessage(),
                         request.getRequestURI()
@@ -61,13 +66,29 @@ public class WorkspaceExceptionHandler {
 
         logWarning(request, exception);
 
+        List<ValidationExceptionDetails> details = exception
+                .getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(fieldError -> {
+                    return new ValidationExceptionDetails(
+                            fieldError.getField(),
+                            fieldError.getDefaultMessage(),
+                            String.valueOf(fieldError.getRejectedValue())
+                            );
+                })
+                .toList();
+
+        ExceptionResponse response = new ValidationExceptionResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "ValidationException: Provided argument violates validation constraints.",
+                request.getRequestURI(),
+                details
+        );
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ExceptionResponse(
-                        HttpStatus.BAD_REQUEST.value(),
-                        "ValidationException: Provided argument violates validation constraints.",
-                        request.getRequestURI()
-                ));
+                .body(response);
     }
 
     @ExceptionHandler(value = {
@@ -80,7 +101,7 @@ public class WorkspaceExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ExceptionResponse(
+                .body(new BackendExceptionResponse(
                         HttpStatus.BAD_REQUEST.value(),
                         "Invariant violation: This action may not be performed due to resource's current state or an illegal input.",
                         request.getRequestURI()
@@ -99,7 +120,7 @@ public class WorkspaceExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ExceptionResponse(
+                .body(new BackendExceptionResponse(
                         HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         "Error occurred. Please contact support or try again later.",
                         request.getRequestURI()
