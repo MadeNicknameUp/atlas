@@ -31,6 +31,9 @@ public class Workspace {
 
     private WorkspaceState state;
 
+    // TODO: Maybe I should make this OneToOne with Member, since Member already has userId.
+    //  If I do it like that, I can make resource level validation more efficient.
+    //  (Required: Evaluate Trade-offs)
     @Column(nullable = false)
     private UUID ownerId;
 

@@ -60,7 +60,7 @@ public class WorkspaceService {
         return memberRepository
                 .findAllByUserId(memberId, page)
                 .stream()
-                .map(Member::getWorkplace)
+                .map(Member::getWorkspace)
                 .filter(w -> query.filter().applyOn(w))
                 .toList();
     }

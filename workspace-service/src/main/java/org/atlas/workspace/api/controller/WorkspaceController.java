@@ -57,6 +57,7 @@ public class WorkspaceController {
         );
     }
 
+    // TODO: Should this actually return 'ThickWorkspaceResponse' or should members be fetched via member-oriented endpoint?
     @GetMapping("/{workspaceId}")
     public ResponseEntity<ThickWorkspaceResponse> getWorkplace(
             @PathVariable("workspaceId") UUID workspaceId

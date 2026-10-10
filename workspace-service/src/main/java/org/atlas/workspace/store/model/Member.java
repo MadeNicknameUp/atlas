@@ -30,14 +30,14 @@ public class Member {
     private MemberRole role;
 
     @ManyToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH })
-    private Workspace workplace;
+    private Workspace workspace;
 
     @CreationTimestamp
     private Instant createdAt;
 
-    public Member(UUID ownerId, MemberRole memberRole, Workspace workplace) {
+    public Member(UUID ownerId, MemberRole memberRole, Workspace workspace) {
         this.userId = ownerId;
         this.role = memberRole;
-        this.workplace = workplace;
+        this.workspace = workspace;
     }
 }
