@@ -44,3 +44,25 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.named<Test>("test") {
+    useJUnitPlatform {
+        excludeTags("IntegrationTest")
+    }
+}
+
+val itest by tasks.registering(Test::class) {
+
+    description = "Runs integration tests tagged with TestType.ITEST."
+    group = "verification"
+
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+
+    shouldRunAfter(tasks.named("test"))
+}
+
+tasks.named("check") {
+    dependsOn(itest)
+}
+

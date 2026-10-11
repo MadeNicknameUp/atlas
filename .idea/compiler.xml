@@ -13,6 +13,10 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="user-service" target="25" />
+      <module name="user-service.main" target="25" />
+      <module name="user-service.test" target="25" />
+      <module name="workplace-service.main" target="25" />
+      <module name="workplace-service.test" target="25" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

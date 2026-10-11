@@ -1,16 +1,14 @@
-package org.atlas.workspace;
+package org.atlas.workspace.workspace;
 
 import org.atlas.workspace.api.dto.request.WorkspaceCreateRequest;
 import org.atlas.workspace.store.model.Workspace;
 import org.atlas.workspace.store.model.WorkspaceState;
 import org.atlas.workspace.store.repository.WorkspaceRepository;
+import org.atlas.workspace.templates.AbstractITestWithDatabase;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -25,10 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Import(TestcontainersConfiguration.class)
-class WorkspaceServiceApplicationTests {
+class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
 
     @Autowired
     private MockMvc mockMvc;
