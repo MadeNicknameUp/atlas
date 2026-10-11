@@ -61,7 +61,7 @@ public class SpecificationUtils {
                 return null;
             }
 
-            return cb.equal(cb.lower(root.get("state")), WorkspaceState.valueOf(state));
+            return cb.equal(root.get("state"), WorkspaceState.valueOf(state));
         };
     }
 
