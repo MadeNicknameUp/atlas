@@ -26,7 +26,8 @@ public class UserController {
     public ResponseEntity<UserResponse> getMe(
             @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject
     ) {
-        return ResponseEntity.ok(UserResponse.from(userService.getMe(subject)));
+        return ResponseEntity.ok(UserResponse
+                .from(userService.getMe(subject)));
     }
 
     @PatchMapping("/profile")
@@ -34,7 +35,8 @@ public class UserController {
             @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject,
             @Valid @RequestBody UpdateProfileRequest request
     ) {
-        return ResponseEntity.ok(UserResponse.from(userService.updateProfile(subject, request)));
+        return ResponseEntity.ok(UserResponse
+                .from(userService.updateProfile(subject, request)));
     }
 
     @PatchMapping("/preferences")
@@ -42,7 +44,8 @@ public class UserController {
             @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject,
             @RequestBody Map<String, Object> request
     ) {
-        return ResponseEntity.ok(UserResponse.from(userService.updatePreferences(subject, request)));
+        return ResponseEntity.ok(UserResponse
+                .from(userService.updatePreferences(subject, request)));
     }
 
     @PatchMapping("/notification-preferences")
@@ -50,6 +53,7 @@ public class UserController {
             @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject,
             @RequestBody Map<String, Object> request
     ) {
-        return ResponseEntity.ok(UserResponse.from(userService.updateNotificationPreferences(subject, request)));
+        return ResponseEntity.ok(UserResponse
+                .from(userService.updateNotificationPreferences(subject, request)));
     }
 }

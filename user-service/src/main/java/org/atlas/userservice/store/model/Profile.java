@@ -5,12 +5,11 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "profile")
+@Table(name = "atlas_profile")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Profile {
 
     @Id
@@ -21,19 +20,19 @@ public class Profile {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(name = "full_name")
+    @Column
     private String fullName;
 
-    @Column(name = "display_name")
+    @Column
     private String displayName;
 
-    @Column(name = "username")
+    @Column
     private String username;
 
-    @Column(name = "about")
+    @Column
     private String about;
 
-    @Column(name = "position")
+    @Column
     private String position;
 
 }

@@ -16,8 +16,12 @@ public record UserResponse(
         Instant updatedAt
 ) {
     public static UserResponse from(User u) {
-        return new UserResponse(u.getId(), u.isActive(), u.getPreferences(),
+        return new UserResponse(
+                u.getId(),
+                u.isActive(),
+                u.getPreferences(),
                 u.getNotificationPreferences(), ProfileResponse.from(u.getProfile()),
-                u.getCreatedAt(), u.getUpdatedAt());
+                u.getCreatedAt(), u.getUpdatedAt()
+        );
     }
 }

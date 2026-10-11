@@ -13,44 +13,40 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "atlas_users")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "identity_subject", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String identitySubject;
 
-    @Builder.Default
     @Column(nullable = false)
     private boolean active = true;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;
 
-    @Builder.Default
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "preferences", columnDefinition = "jsonb", nullable = false)
+    @Column(columnDefinition = "jsonb", nullable = false)
     private Map<String, Object> preferences = new HashMap<>();
 
-    @Builder.Default
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "notification_preferences", columnDefinition = "jsonb", nullable = false)
+    @Column(columnDefinition = "jsonb", nullable = false)
     private Map<String, Object> notificationPreferences = new HashMap<>();
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private Instant updatedAt;
 
     public void deactivate() {

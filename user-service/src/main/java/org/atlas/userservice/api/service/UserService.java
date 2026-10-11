@@ -2,6 +2,7 @@ package org.atlas.userservice.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.userservice.api.dto.request.UpdateProfileRequest;
+import org.atlas.userservice.api.dto.request.UpdateProfileRequest.Field;
 import org.atlas.userservice.api.exception.unit.NotFoundException;
 import org.atlas.userservice.api.exception.unit.UserDeactivatedException;
 import org.atlas.userservice.store.model.Profile;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+
 
 @Service
 @RequiredArgsConstructor
@@ -36,11 +38,11 @@ public class UserService {
             user.setProfile(profile);
         }
 
-        if (req.fullName() != null)    profile.setFullName(req.fullName());
-        if (req.displayName() != null) profile.setDisplayName(req.displayName());
-        if (req.username() != null)    profile.setUsername(req.username());
-        if (req.about() != null)       profile.setAbout(req.about());
-        if (req.position() != null)    profile.setPosition(req.position());
+        if (req.has(Field.FULL_NAME))    profile.setFullName(req.getFullName());
+        if (req.has(Field.DISPLAY_NAME)) profile.setDisplayName(req.getDisplayName());
+        if (req.has(Field.USERNAME))     profile.setUsername(req.getUsername());
+        if (req.has(Field.ABOUT))        profile.setAbout(req.getAbout());
+        if (req.has(Field.POSITION))     profile.setPosition(req.getPosition());
 
         return user;
     }
@@ -66,16 +68,15 @@ public class UserService {
         return user;
     }
 
-    @Transactional(readOnly = true)
     private User find(String subject) {
         return userRepository.findByIdentitySubject(subject)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found: subject " + subject));
     }
 
     private User findActive(String subject) {
         User user = find(subject);
         if (!user.isActive()) {
-            throw new UserDeactivatedException("User is deactivated");
+            throw new UserDeactivatedException("User is deactivated: id=" + user.getId() + ", subject=" + subject);
         }
         return user;
     }
