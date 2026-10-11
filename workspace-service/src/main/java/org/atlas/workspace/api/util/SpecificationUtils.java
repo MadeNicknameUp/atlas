@@ -73,7 +73,7 @@ public class SpecificationUtils {
                 return null;
             }
 
-            return cb.equal(root.get("owner"), UUID.fromString(ownerId));
+            return cb.equal(root.get("ownerId"), UUID.fromString(ownerId));
         };
     }
 

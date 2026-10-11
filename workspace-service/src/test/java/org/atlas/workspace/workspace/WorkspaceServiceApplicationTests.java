@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -369,6 +370,210 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
                 .andExpect(jsonPath("$.length()", is(0)));
 
         assertThat(workspaceRepository.count()).isEqualTo(totalWorkspaces);
+    }
+
+    @Test
+    void userHasManyWorkspacesAndCanFilterThemByOwnerId() throws Exception {
+
+        // Arrange
+        UUID ownerId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
+        int totalWorkspaces = 38;
+
+        List<Workspace> workspaces = new ArrayList<>(totalWorkspaces);
+
+        for (int i = 0; i < totalWorkspaces; ++i) {
+            UUID tempOwnerId = i % 2 == 0 ? ownerId : UUID.randomUUID();
+
+            workspaces.add(Workspace.create(
+                    "name " + i,
+                    "iconUrl",
+                    "description",
+                    tempOwnerId)
+            );
+        }
+
+        workspaceRepository.saveAll(workspaces);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/workspaces")
+                        .param("ownerId", ownerId.toString())
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(totalWorkspaces / 2)));
+
+        assertThat(workspaceRepository.count()).isEqualTo(totalWorkspaces);
+    }
+
+    @Test
+    void userHasManyWorkspacesAndCanFilterThemByDescription() throws Exception {
+
+        // Arrange
+        UUID ownerId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
+        int totalWorkspaces = 38;
+
+        List<Workspace> workspaces = new ArrayList<>(totalWorkspaces);
+
+        for (int i = 0; i < totalWorkspaces; ++i) {
+            String description = i % 2 == 0 ? "description" : "another description";
+
+            workspaces.add(Workspace.create(
+                    "name " + i,
+                    "iconUrl",
+                    description,
+                    ownerId)
+            );
+        }
+
+        workspaceRepository.saveAll(workspaces);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/workspaces")
+                        .param("description", "another")
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(totalWorkspaces / 2)));
+
+        assertThat(workspaceRepository.count()).isEqualTo(totalWorkspaces);
+    }
+
+    @Test
+    void userHasManyWorkspacesAndCanFilterThemByTimeRange() throws Exception {
+
+        // Arrange
+        UUID ownerId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
+        int validWorkspaces = 23;
+        int invalidWorkspaces = 10;
+
+        List<Workspace> workspaces = new ArrayList<>(validWorkspaces);
+
+        Instant from = Instant.now();
+
+        for (int i = 0; i < validWorkspaces; ++i) {
+            String description = i % 2 == 0 ? "description" : "another description";
+
+            workspaces.add(Workspace.create(
+                    "name " + i,
+                    "iconUrl",
+                    description,
+                    ownerId)
+            );
+        }
+
+        workspaceRepository.saveAll(workspaces);
+
+        Instant until = Instant.now();
+
+        for (int i = 0; i < invalidWorkspaces; ++i) {
+            workspaceRepository.save(Workspace.create(
+                    "name",
+                    "iconUrl",
+                    "description",
+                    ownerId)
+            );
+        }
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/workspaces")
+                        .param("from", from.toString())
+                        .param("until", until.toString())
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(validWorkspaces)));
+
+        assertThat(workspaceRepository.count()).isEqualTo(validWorkspaces + invalidWorkspaces);
+    }
+
+    @Test
+    void userHasManyWorkspacesAndCanFilterThemByFrom() throws Exception {
+
+        // Arrange
+        UUID ownerId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
+        int validWorkspaces = 23;
+        int invalidWorkspaces = 10;
+
+        List<Workspace> workspaces = new ArrayList<>(invalidWorkspaces);
+
+        for (int i = 0; i < invalidWorkspaces; ++i) {
+            String description = i % 2 == 0 ? "description" : "another description";
+
+            workspaces.add(Workspace.create(
+                    "name " + i,
+                    "iconUrl",
+                    description,
+                    ownerId)
+            );
+        }
+
+        workspaceRepository.saveAll(workspaces);
+
+        Instant from = Instant.now();
+
+        for (int i = 0; i < validWorkspaces; ++i) {
+            workspaceRepository.save(Workspace.create(
+                    "name",
+                    "iconUrl",
+                    "description",
+                    ownerId)
+            );
+        }
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/workspaces")
+                        .param("from", from.toString())
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(validWorkspaces)));
+
+        assertThat(workspaceRepository.count()).isEqualTo(validWorkspaces + invalidWorkspaces);
+    }
+
+    @Test
+    void userHasManyWorkspacesAndCanFilterThemByUntil() throws Exception {
+
+        // Arrange
+        UUID ownerId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
+        int validWorkspaces = 23;
+        int invalidWorkspaces = 10;
+
+        List<Workspace> workspaces = new ArrayList<>(invalidWorkspaces);
+
+        for (int i = 0; i < invalidWorkspaces; ++i) {
+            String description = i % 2 == 0 ? "description" : "another description";
+
+            workspaces.add(Workspace.create(
+                    "name " + i,
+                    "iconUrl",
+                    description,
+                    ownerId)
+            );
+        }
+
+        workspaceRepository.saveAll(workspaces);
+
+        Instant until = Instant.now();
+
+        for (int i = 0; i < validWorkspaces; ++i) {
+            workspaceRepository.save(Workspace.create(
+                    "name",
+                    "iconUrl",
+                    "description",
+                    ownerId)
+            );
+        }
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/workspaces")
+                        .param("from", until.toString())
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(validWorkspaces)));
+
+        assertThat(workspaceRepository.count()).isEqualTo(validWorkspaces + invalidWorkspaces);
     }
 
     @Test
