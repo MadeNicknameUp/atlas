@@ -9,10 +9,10 @@ public record WorkspaceUpdateRequest(
         @Size(max = 128, message = "Name length may not exceed 128 characters.")
         JsonNullable<String> name,
 
-        @Size(max = 1024, message = "Description is way too long. Max size allowed: 1024 characters.")
+        @Size(max = 1024, message = "IconUrl is way too long. Max size allowed: 1024 characters.")
         JsonNullable<String> iconUrl,
 
-        @Size(max = 1024, message = "IconUrl is way too long. Max size allowed: 1024 characters.")
+        @Size(max = 1024, message = "Description is way too long. Max size allowed: 1024 characters.")
         JsonNullable<String> description
 ) {
     public WorkspaceUpdateRequest {

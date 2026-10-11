@@ -602,18 +602,28 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
     void nonExistentWorkspaceMayNotBeArchived() throws Exception {
 
         // Arrange
+        UUID ownerId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
+        Workspace workspace = workspaceRepository.save(Workspace.create(
+                "name",
+                "iconUrl",
+                "description",
+                ownerId
+        ));
+
         UUID invalidWorkspaceId = UUID.randomUUID();
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/workspaces/%s".formatted(invalidWorkspaceId))
+        mockMvc.perform(post("/api/v1/workspaces/%s/archive".formatted(invalidWorkspaceId))
                 ).andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.message").value("Workspace with id: %s not found.".formatted(invalidWorkspaceId)))
-                .andExpect(jsonPath("$.path").value("/api/v1/workspaces/%s".formatted(invalidWorkspaceId)));
+                .andExpect(jsonPath("$.path").value("/api/v1/workspaces/%s/archive".formatted(invalidWorkspaceId)));
 
-        assertThat(workspaceRepository.count()).isEqualTo(0);
-        assertThat(workspaceRepository.findById(invalidWorkspaceId)).isEmpty();
+        assertThat(workspaceRepository.count()).isEqualTo(1);
+        assertThat(workspaceRepository.findById(workspace.getId())).isPresent();
+        assertThat(workspaceRepository.findById(workspace.getId()).get().getState()).isEqualTo(WorkspaceState.ACTIVE);
     }
 }
 

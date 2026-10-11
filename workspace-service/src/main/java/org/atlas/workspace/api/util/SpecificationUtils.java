@@ -37,7 +37,7 @@ public class SpecificationUtils {
                 return null;
             }
 
-            return cb.like(cb.lower(root.get("name")), name.toLowerCase(Locale.ROOT) + "%");
+            return cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase(Locale.ROOT) + "%");
         };
     }
 
@@ -61,7 +61,7 @@ public class SpecificationUtils {
                 return null;
             }
 
-            return cb.equal(root.get("state"), WorkspaceState.valueOf(state));
+            return cb.equal(root.get("state"), WorkspaceState.valueOf(state.toUpperCase(Locale.ROOT)));
         };
     }
 
@@ -73,7 +73,7 @@ public class SpecificationUtils {
                 return null;
             }
 
-            return cb.equal(cb.lower(root.get("owner").get("userId")), ownerId.toLowerCase(Locale.ROOT));
+            return cb.equal(root.get("owner"), UUID.fromString(ownerId));
         };
     }
 

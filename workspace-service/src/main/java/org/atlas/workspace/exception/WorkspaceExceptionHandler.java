@@ -21,7 +21,7 @@ import java.util.List;
 @RestControllerAdvice
 public class WorkspaceExceptionHandler {
 
-    @ExceptionHandler(value = { NotFoundException.class })
+    @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleNotFoundException(
             HttpServletRequest request,
             NotFoundException exception
@@ -38,7 +38,7 @@ public class WorkspaceExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(value = { ValidationException.class })
+    @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ExceptionResponse> handleCustomValidationException(
             HttpServletRequest request,
             ValidationException exception
@@ -55,10 +55,26 @@ public class WorkspaceExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(value = {
-            MethodArgumentNotValidException.class,
-            HandlerMethodValidationException.class
-    })
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ExceptionResponse> handleValidationException(
+            HttpServletRequest request,
+            HandlerMethodValidationException exception
+    ) {
+
+        logWarning(request, exception);
+
+        ExceptionResponse response = new BackendExceptionResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "ValidationException: Provided argument violates validation constraints.",
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleValidationException(
             HttpServletRequest request,
             MethodArgumentNotValidException exception
@@ -75,7 +91,7 @@ public class WorkspaceExceptionHandler {
                             fieldError.getField(),
                             fieldError.getDefaultMessage(),
                             String.valueOf(fieldError.getRejectedValue())
-                            );
+                    );
                 })
                 .toList();
 
@@ -109,7 +125,7 @@ public class WorkspaceExceptionHandler {
     }
 
 
-    @ExceptionHandler(value = { Exception.class })
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionResponse> handleOtherException(HttpServletRequest request, Exception exception) {
 
         log.error("{}: {}. Happened on: {}.",

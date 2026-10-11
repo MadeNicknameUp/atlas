@@ -56,6 +56,10 @@ val itest by tasks.registering(Test::class) {
     description = "Runs integration tests tagged with TestType.ITEST."
     group = "verification"
 
+    useJUnitPlatform {
+        includeTags("IntegrationTest")
+    }
+
     testClassesDirs = sourceSets["test"].output.classesDirs
     classpath = sourceSets["test"].runtimeClasspath
 
