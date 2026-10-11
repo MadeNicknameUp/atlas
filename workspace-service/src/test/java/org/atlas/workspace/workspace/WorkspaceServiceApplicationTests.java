@@ -95,7 +95,6 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
                 .andExpect(jsonPath("$.path").value("/api/v1/workspaces"))
                 .andExpect(jsonPath("$.details").isNotEmpty());
 
-        // Assert
         assertThat(workspaceRepository.count()).isEqualTo(0);
     }
 
@@ -124,7 +123,6 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
                 .andExpect(jsonPath("$.icon_url").value("iconUrl"))
                 .andExpect(jsonPath("$.description").value("description"));
 
-        // Assert
         assertThat(workspaceRepository.count()).isEqualTo(1);
         assertThat(workspaceRepository.findById(workspace.getId())).isPresent();
     }
@@ -152,11 +150,72 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
                 .andExpect(jsonPath("$.message").value("Workspace with id: %s not found.".formatted(invalidWorkspaceId)))
                 .andExpect(jsonPath("$.path").value("/api/v1/workspaces/%s".formatted(invalidWorkspaceId)));
 
-        // Assert
         assertThat(workspaceRepository.count()).isEqualTo(1);
         assertThat(workspaceRepository.findById(workspace.getId())).isPresent();
     }
 
+    @Test
+    void userHasNoWorkspaces() throws Exception {
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/workspaces")
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+
+    }
+
+    // filter testing
+
+    @Test
+    void workspaceMayBeArchived() throws Exception {
+
+        // Arrange
+        UUID ownerId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
+
+        Workspace workspace = Workspace.create(
+                "name",
+                "iconUrl",
+                "description",
+                ownerId
+        );
+
+        workspaceRepository.save(workspace);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/workspaces/%s/archive".formatted(workspace.getId()))
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.workspace_id").value(workspace.getId().toString()))
+                .andExpect(jsonPath("$.name").value("name"))
+                .andExpect(jsonPath("$.icon_url").value("iconUrl"))
+                .andExpect(jsonPath("$.state").value(WorkspaceState.ARCHIVED.toString()))
+                .andExpect(jsonPath("$.owner_id").value(ownerId.toString()))
+                .andExpect(jsonPath("$.icon_url").value("iconUrl"))
+                .andExpect(jsonPath("$.description").value("description"));
+
+        assertThat(workspaceRepository.count()).isEqualTo(1);
+        assertThat(workspaceRepository.findById(workspace.getId())).isPresent();
+        assertThat(workspaceRepository.findById(workspace.getId()).get().getState()).isEqualTo(WorkspaceState.ARCHIVED);
+    }
+
+    @Test
+    void nonExistentWorkspaceMayNotBeArchived() throws Exception {
+
+        // Arrange
+        UUID invalidWorkspaceId = UUID.randomUUID();
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/workspaces/%s".formatted(invalidWorkspaceId))
+                ).andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Workspace with id: %s not found.".formatted(invalidWorkspaceId)))
+                .andExpect(jsonPath("$.path").value("/api/v1/workspaces/%s".formatted(invalidWorkspaceId)));
+
+        assertThat(workspaceRepository.count()).isEqualTo(0);
+        assertThat(workspaceRepository.findById(invalidWorkspaceId)).isEmpty();
+    }
 }
 
 
