@@ -48,7 +48,10 @@ public class WorkspaceService {
         Pageable page = PageRequest.of(
                 (query.page() == null || query.page() < 0) ? 0 : query.page(),
                 (query.pageSize() == null || query.pageSize() <= 0)? 25 : query.pageSize(),
-                Sort.by(Sort.Direction.DESC, "createdAt")
+                Sort.by(
+                        Sort.Order.desc("createdAt"),
+                        Sort.Order.desc("id")
+                )
         );
 
         Specification<Workspace> specification = SpecificationUtils.containsUserId(userId);

@@ -8,12 +8,17 @@ import org.atlas.workspace.exception.dto.ExceptionResponse;
 import org.atlas.workspace.exception.dto.ValidationExceptionResponse;
 import org.atlas.workspace.exception.unit.NotFoundException;
 import org.atlas.workspace.exception.unit.ValidationException;
+import org.springframework.boot.context.properties.bind.BindException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 
@@ -124,6 +129,28 @@ public class WorkspaceExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(value = {
+            MethodArgumentTypeMismatchException.class,
+            HttpMessageNotReadableException.class,
+            HttpMediaTypeNotSupportedException.class,
+            MissingServletRequestParameterException.class,
+            BindException.class,
+    })
+    public ResponseEntity<ExceptionResponse> handleOtherInvalidInputExceptions(
+            HttpServletRequest request,
+            RuntimeException exception
+    ) {
+
+        logWarning(request, exception);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new BackendExceptionResponse(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Invariant violation: This action may not be performed due to resource's current state or an illegal input.",
+                        request.getRequestURI()
+                ));
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionResponse> handleOtherException(HttpServletRequest request, Exception exception) {
