@@ -12,6 +12,7 @@ import org.atlas.workspace.store.model.Workspace;
 import org.atlas.workspace.store.repository.WorkspaceRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +47,8 @@ public class WorkspaceService {
 
         Pageable page = PageRequest.of(
                 (query.page() == null || query.page() < 0) ? 0 : query.page(),
-                (query.pageSize() == null || query.pageSize() <= 0)? 25 : query.pageSize()
+                (query.pageSize() == null || query.pageSize() <= 0)? 25 : query.pageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
         Specification<Workspace> specification = SpecificationUtils.containsUserId(userId);

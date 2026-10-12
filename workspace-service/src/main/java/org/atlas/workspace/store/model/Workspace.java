@@ -119,6 +119,6 @@ public class Workspace {
             throw new IllegalStateException("Cannot modify archived workspace.");
         }
 
-        this.iconUrl = null;
+        this.iconUrl = "";
     }
 }

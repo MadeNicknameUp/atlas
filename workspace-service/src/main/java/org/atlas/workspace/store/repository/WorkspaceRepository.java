@@ -13,6 +13,6 @@ import java.util.UUID;
 public interface WorkspaceRepository
         extends JpaRepository<Workspace, UUID>, JpaSpecificationExecutor<Workspace> {
 
-    @EntityGraph("members")
+    @EntityGraph(attributePaths = "members")
     Optional<Workspace> findByIdAndMembersUserId(UUID workspaceId, UUID userId);
 }

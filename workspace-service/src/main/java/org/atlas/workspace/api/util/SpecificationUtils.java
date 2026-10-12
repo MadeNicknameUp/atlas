@@ -16,10 +16,6 @@ public class SpecificationUtils {
     public static Specification<Workspace> containsUserId(UUID userId) {
         return (root, query, cb) -> {
 
-            if (userId == null) {
-                return null;
-            }
-
             // Very defensive.
             query.distinct(true);
 

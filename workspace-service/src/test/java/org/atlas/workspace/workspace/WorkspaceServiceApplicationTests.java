@@ -540,9 +540,9 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
         int validWorkspaces = 23;
         int invalidWorkspaces = 10;
 
-        List<Workspace> workspaces = new ArrayList<>(invalidWorkspaces);
+        List<Workspace> workspaces = new ArrayList<>(validWorkspaces);
 
-        for (int i = 0; i < invalidWorkspaces; ++i) {
+        for (int i = 0; i < validWorkspaces; ++i) {
             String description = i % 2 == 0 ? "description" : "another description";
 
             workspaces.add(Workspace.create(
@@ -557,7 +557,7 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
 
         Instant until = Instant.now();
 
-        for (int i = 0; i < validWorkspaces; ++i) {
+        for (int i = 0; i < invalidWorkspaces; ++i) {
             workspaceRepository.save(Workspace.create(
                     "name",
                     "iconUrl",
@@ -568,7 +568,7 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/workspaces")
-                        .param("from", until.toString())
+                        .param("until", until.toString())
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(validWorkspaces)));
