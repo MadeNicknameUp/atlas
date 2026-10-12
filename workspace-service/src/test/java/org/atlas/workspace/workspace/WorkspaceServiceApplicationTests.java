@@ -104,6 +104,36 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
     }
 
     @Test
+    void workspaceMayNotBeCreatedIfInvalidJsonIsProvidedAndResponseIsUserFriendly() throws Exception {
+
+        // Arrange, Act & Assert
+        mockMvc.perform(post("/api/v1/workspaces")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new Object()))
+                ).andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("ValidationException: Provided argument violates validation constraints."))
+                .andExpect(jsonPath("$.path").value("/api/v1/workspaces"))
+                .andExpect(jsonPath("$.details").isNotEmpty());
+
+        assertThat(workspaceRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    void workspaceMayNotBeCreatedIfInvalidContentTypeIsProvidedAndResponseIsUserFriendly() throws Exception {
+
+        // Arrange, Act & Assert
+        mockMvc.perform(post("/api/v1/workspaces")
+                        .contentType(MediaType.APPLICATION_ATOM_XML)
+                        .content(objectMapper.writeValueAsString(new Object()))
+                ).andDo(print())
+                .andExpect(status().isUnsupportedMediaType());
+
+        assertThat(workspaceRepository.count()).isEqualTo(0);
+    }
+
+    @Test
     void workspaceMayBeFetched() throws Exception {
 
         // Arrange
@@ -156,6 +186,15 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
 
         assertThat(workspaceRepository.count()).isEqualTo(1);
         assertThat(workspaceRepository.findById(workspace.getId())).isPresent();
+    }
+
+    @Test
+    void workspaceFetchReceivesInvalidId() throws Exception {
+
+        // Arrange, Act & Assert
+        mockMvc.perform(get("/api/v1/workspaces/%s".formatted("not-a-uuid"))
+                ).andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -529,6 +568,29 @@ class WorkspaceServiceApplicationTests extends AbstractITestWithDatabase {
                 .andExpect(jsonPath("$.length()", is(validWorkspaces)));
 
         assertThat(workspaceRepository.count()).isEqualTo(validWorkspaces + invalidWorkspaces);
+    }
+
+    @Test
+    void WorkspaceGetUserWorkspacesReturns400IfInstantIsInvalidAndResponseIsUserFriendly() throws Exception { // HERE
+
+        // Arrange, Act & Assert
+        mockMvc.perform(get("/api/v1/workspaces")
+                        .param("from", "not-an-instant")
+                ).andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("ValidationException: Provided argument violates validation constraints."))
+                .andExpect(jsonPath("$.path").value("/api/v1/workspaces"))
+                .andExpect(jsonPath("$.details").isNotEmpty());
+
+        mockMvc.perform(get("/api/v1/workspaces")
+                        .param("until", "not-an-instant")
+                ).andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("ValidationException: Provided argument violates validation constraints."))
+                .andExpect(jsonPath("$.path").value("/api/v1/workspaces"))
+                .andExpect(jsonPath("$.details").isNotEmpty());
     }
 
     @Test
