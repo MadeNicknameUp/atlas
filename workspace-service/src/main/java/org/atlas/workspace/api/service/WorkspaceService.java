@@ -74,13 +74,9 @@ public class WorkspaceService {
     @Transactional
     public Workspace updateWorkspace(UUID userId, UUID workspaceId, WorkspaceUpdateCommand workspaceUpdateCommand) {
 
-        Workspace workspace = workspaceRepository.findById(workspaceId)
+        // This has to depend on workspace settings (EDITOR may also update workspace).
+        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId)
                 .orElseThrow(() -> new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId)));
-
-        // This has to depend on workspace settings.
-        if(!workspace.getOwnerId().equals(userId)) {
-            throw new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId));
-        }
 
         switch (workspaceUpdateCommand.name()){
             case PatchValue.Unchanged<String> _ -> {}
@@ -100,19 +96,14 @@ public class WorkspaceService {
             case PatchValue.Clear<String> _ -> workspace.removeIcon();
         }
 
-
         return workspaceRepository.save(workspace);
     }
 
     @Transactional
     public Workspace archiveWorkspace(UUID userId, UUID workspaceId) {
 
-        Workspace workspace = workspaceRepository.findById(workspaceId)
+        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId)
                 .orElseThrow(() -> new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId)));
-
-        if(!workspace.getOwnerId().equals(userId)) {
-            throw new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId));
-        }
 
         workspace.archive();
 

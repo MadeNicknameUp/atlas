@@ -15,4 +15,7 @@ public interface WorkspaceRepository
 
     @EntityGraph(attributePaths = "members")
     Optional<Workspace> findByIdAndMembersUserId(UUID workspaceId, UUID userId);
+
+    Optional<Workspace> findByIdAndOwnerId(UUID workspaceId, UUID ownerId);
+
 }
