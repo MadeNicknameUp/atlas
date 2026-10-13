@@ -49,6 +49,10 @@ public class User {
     @Column(nullable = false)
     private Instant updatedAt;
 
+    public User(String identitySubject) {
+        this.identitySubject = identitySubject;
+    }
+
     public void deactivate() {
         this.active = false;
     }
