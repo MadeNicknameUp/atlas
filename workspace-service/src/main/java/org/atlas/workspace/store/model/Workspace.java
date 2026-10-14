@@ -60,7 +60,7 @@ public class Workspace {
         workspace.setIconUrl(iconUrl);
         workspace.setDescription(description);
         workspace.ownerId = ownerId;
-        workspace.getMembers().add(new Member(ownerId, MemberRole.OWNER, workspace));
+        workspace.getMembers().add(Member.createOwner(ownerId, workspace));
         workspace.state = WorkspaceState.ACTIVE;
 
         return workspace;

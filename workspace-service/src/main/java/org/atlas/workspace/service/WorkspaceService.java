@@ -1,11 +1,11 @@
-package org.atlas.workspace.api.service;
+package org.atlas.workspace.service;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.workspace.api.dto.command.CreateWorkspaceCommand;
 import org.atlas.workspace.api.dto.command.FindWorkspacesQuery;
 import org.atlas.workspace.api.dto.command.PatchValue;
 import org.atlas.workspace.api.dto.command.WorkspaceUpdateCommand;
-import org.atlas.workspace.api.util.SpecificationUtils;
+import org.atlas.workspace.util.SpecificationUtils;
 import org.atlas.workspace.exception.unit.NotFoundException;
 import org.atlas.workspace.exception.unit.ValidationException;
 import org.atlas.workspace.store.model.Workspace;

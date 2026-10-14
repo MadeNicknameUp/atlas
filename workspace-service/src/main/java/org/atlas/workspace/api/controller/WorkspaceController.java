@@ -10,7 +10,7 @@ import org.atlas.workspace.api.dto.request.WorkspaceUpdateRequest;
 import org.atlas.workspace.api.dto.response.ThinWorkspaceResponse;
 import org.atlas.workspace.api.dto.response.WorkspaceCreatedResponse;
 import org.atlas.workspace.api.dto.response.ThickWorkspaceResponse;
-import org.atlas.workspace.api.service.WorkspaceService;
+import org.atlas.workspace.service.WorkspaceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

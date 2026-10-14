@@ -1,4 +1,4 @@
-package org.atlas.workspace.api.util;
+package org.atlas.workspace.util;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
