@@ -1,14 +1,16 @@
 package org.atlas.workspace.service;
 
 import lombok.RequiredArgsConstructor;
+import org.atlas.workspace.api.dto.command.FindDomainQuery;
 import org.atlas.workspace.api.dto.command.PatchValue;
-import org.atlas.workspace.api.dto.command.UpdateMemberCommand;
+import org.atlas.workspace.api.dto.command.MemberUpdateCommand;
+import org.atlas.workspace.api.dto.request.MemberFilter;
 import org.atlas.workspace.exception.unit.NotFoundException;
 import org.atlas.workspace.exception.unit.ValidationException;
-import org.atlas.workspace.store.model.Member;
-import org.atlas.workspace.store.model.MemberRole;
-import org.atlas.workspace.store.model.MemberState;
-import org.atlas.workspace.store.repository.MemberRepository;
+import org.atlas.workspace.domain.model.Member;
+import org.atlas.workspace.domain.model.MemberRole;
+import org.atlas.workspace.domain.model.MemberState;
+import org.atlas.workspace.domain.repository.MemberRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,31 +25,36 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public List<Member> findMembersByWorkspaceId(UUID userId, UUID workspaceId, FindEntityQuery<Member> query) {
+    // TODO: This method is trash and needs to be reworked.
+    public List<Member> findMembersByWorkspaceId(UUID userId, UUID workspaceId, FindDomainQuery<MemberFilter> query) {
 
         Pageable page = PageRequest.of(
                 (query.page() == null || query.page() < 0) ? 0 : query.page(),
                 (query.pageSize() == null || query.pageSize() < 0)? 25 : query.pageSize()
         );
 
+        // Where are the filters?
+
         List<Member> members = memberRepository.findAllByWorkspaceId(workspaceId, page);
 
+        // Wth is this, this does not even work. You look ONLY on the page, not an entire list, just delegate to DB.
         if (members.stream().anyMatch(m -> m.getId().equals(userId) && m.getState().equals(MemberState.ACTIVE))) {
             throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
         }
 
-        return members
-                .stream()
-                .filter(m -> query.filter().applyOn(m))
-                .toList();
+        return members;
+//                .stream()
+//                .filter(m -> query.filter().applyOn(m))
+//                .toList();
     }
 
     public Member findById(UUID userId, UUID workspaceId, UUID memberId) {
 
-        Member member = memberRepository.findByWorkspaceIdAndId(workspaceId, memberId)
+        // Why is Owner the only one to see this? This is wrong, another method is needed.
+        Member member = memberRepository.findByIdAndWorkspaceIdAndWorkspaceOwnerId(memberId, workspaceId, userId)
                 .orElseThrow(() -> new NotFoundException("Member with id: %s not found.".formatted(workspaceId)));
 
-        // Efficiency of this one is so poor... Reevaluate this.
+        // Just delegate this to DB (in one query plz).
         if (member
                 .getWorkspace()
                 .getMembers()
@@ -64,15 +71,11 @@ public class MemberService {
             UUID userId,
             UUID workspaceId,
             UUID memberId,
-            UpdateMemberCommand command
+            MemberUpdateCommand command
     ) {
 
-        Member member = memberRepository.findByWorkspaceIdAndId(workspaceId, memberId)
+        Member member = memberRepository.findByIdAndWorkspaceIdAndWorkspaceOwnerId(memberId, workspaceId, userId)
                 .orElseThrow(() -> new NotFoundException("Member with id: %s not found.".formatted(workspaceId)));
-
-        if (!member.getWorkspace().getOwnerId().equals(userId)) {
-            throw new NotFoundException("Member with id: %s not found.".formatted(workspaceId));
-        }
 
         switch (command.role()){
             case PatchValue.Unchanged<String> _ -> {}
@@ -86,15 +89,10 @@ public class MemberService {
     @Transactional
     public void expel(UUID userId, UUID workspaceId, UUID memberId) {
 
-        Member member = memberRepository.findByWorkspaceIdAndId(workspaceId, memberId)
+        Member member = memberRepository.findByIdAndWorkspaceIdAndWorkspaceOwnerId(memberId, workspaceId, userId)
                 .orElseThrow(() -> new NotFoundException("Member with id: %s not found.".formatted(workspaceId)));
 
-        if (!member.getWorkspace().getOwnerId().equals(userId)) {
-            throw new NotFoundException("Member with id: %s not found.".formatted(workspaceId));
-        }
-
-        // This is so bad. Do smth about it. (Owner needs to be passed)
-        member.expel(member.getWorkspace().getMembers().stream().filter(m -> m.getUserId().equals(userId)).findFirst().orElseThrow(
+        member.expel(memberRepository.findAllByWorkspaceIdAndId(workspaceId, memberId).orElseThrow(
                 () -> new NotFoundException("Member with id: %s not found.".formatted(workspaceId))
         ));
     }

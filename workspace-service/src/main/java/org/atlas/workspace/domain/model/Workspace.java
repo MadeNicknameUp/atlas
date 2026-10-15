@@ -1,4 +1,4 @@
-package org.atlas.workspace.store.model;
+package org.atlas.workspace.domain.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

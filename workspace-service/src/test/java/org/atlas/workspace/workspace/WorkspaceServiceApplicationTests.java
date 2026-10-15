@@ -2,9 +2,9 @@ package org.atlas.workspace.workspace;
 
 import org.atlas.workspace.api.dto.request.WorkspaceCreateRequest;
 import org.atlas.workspace.api.dto.request.WorkspaceUpdateRequest;
-import org.atlas.workspace.store.model.Workspace;
-import org.atlas.workspace.store.model.WorkspaceState;
-import org.atlas.workspace.store.repository.WorkspaceRepository;
+import org.atlas.workspace.domain.model.Workspace;
+import org.atlas.workspace.domain.model.WorkspaceState;
+import org.atlas.workspace.domain.repository.WorkspaceRepository;
 import org.atlas.workspace.templates.AbstractITestWithDatabase;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,4 +1,4 @@
-package org.atlas.workspace.store.model;
+package org.atlas.workspace.domain.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -98,7 +98,8 @@ public class Member {
 
     public void changeRole(MemberRole newRole) {
 
-        // Cannot be changed to OWNER and same role, ig
+        // Cannot be changed to OWNER and same role.
+        // Also OWNER cannot be demoted (for now).
 
         role = newRole;
     }

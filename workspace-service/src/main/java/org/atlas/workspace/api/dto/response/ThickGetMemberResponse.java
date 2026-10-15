@@ -1,7 +1,7 @@
 package org.atlas.workspace.api.dto.response;
 
-import org.atlas.workspace.store.model.Member;
-import org.atlas.workspace.store.model.MemberState;
+import org.atlas.workspace.domain.model.Member;
+import org.atlas.workspace.domain.model.MemberState;
 
 public record ThickGetMemberResponse(
         String id,

@@ -3,7 +3,7 @@ package org.atlas.workspace.api.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
-import org.atlas.workspace.api.dto.command.FindWorkspacesQuery;
+import org.atlas.workspace.api.dto.command.FindDomainQuery;
 import org.atlas.workspace.api.dto.request.WorkspaceCreateRequest;
 import org.atlas.workspace.api.dto.request.WorkspaceFilter;
 import org.atlas.workspace.api.dto.request.WorkspaceUpdateRequest;
@@ -52,7 +52,7 @@ public class WorkspaceController {
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
         return ResponseEntity.ok(workspaceService
-                .getWorkspacesByUserId(userId, new FindWorkspacesQuery(filter, page, pageSize))
+                .getWorkspacesByUserId(userId, new FindDomainQuery<>(filter, page, pageSize))
                 .stream()
                 .map(ThinWorkspaceResponse::from)
                 .toList()

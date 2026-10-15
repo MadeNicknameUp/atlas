@@ -9,5 +9,5 @@ public record WorkspaceFilter(
         String ownerId,
         Instant from,
         Instant until
-) {
+) implements SearchFilter {
 }

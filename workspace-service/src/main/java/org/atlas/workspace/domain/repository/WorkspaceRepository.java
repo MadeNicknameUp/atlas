@@ -1,6 +1,6 @@
-package org.atlas.workspace.store.repository;
+package org.atlas.workspace.domain.repository;
 
-import org.atlas.workspace.store.model.Workspace;
+import org.atlas.workspace.domain.model.Workspace;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

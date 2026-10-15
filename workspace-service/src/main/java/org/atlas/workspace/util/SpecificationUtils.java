@@ -2,9 +2,9 @@ package org.atlas.workspace.util;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
-import org.atlas.workspace.store.model.Member;
-import org.atlas.workspace.store.model.Workspace;
-import org.atlas.workspace.store.model.WorkspaceState;
+import org.atlas.workspace.domain.model.Member;
+import org.atlas.workspace.domain.model.Workspace;
+import org.atlas.workspace.domain.model.WorkspaceState;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.Instant;

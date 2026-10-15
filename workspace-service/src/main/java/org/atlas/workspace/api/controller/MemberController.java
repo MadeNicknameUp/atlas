@@ -2,12 +2,12 @@ package org.atlas.workspace.api.controller;
 
 import lombok.RequiredArgsConstructor;
 
+import org.atlas.workspace.api.dto.command.FindDomainQuery;
 import org.atlas.workspace.api.dto.request.MemberFilter;
-import org.atlas.workspace.api.dto.request.UpdateMemberRequest;
+import org.atlas.workspace.api.dto.request.MemberUpdateRequest;
 import org.atlas.workspace.api.dto.response.ThickGetMemberResponse;
 import org.atlas.workspace.api.dto.response.ThinMemberResponse;
 import org.atlas.workspace.service.MemberService;
-import org.atlas.workspace.store.model.Member;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,7 @@ public class MemberController {
 
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
-        FindEntityQuery<Member> query = new FindEntityQuery<>(filter, page, pageSize);
+        FindDomainQuery<MemberFilter> query = new FindDomainQuery<>(filter, page, pageSize);
 
         return ResponseEntity.ok(memberService.findMembersByWorkspaceId(
                                 userId,
@@ -63,8 +63,8 @@ public class MemberController {
     @PatchMapping("/{workspace_id}/members/{member_id}")
     public ResponseEntity<ThickGetMemberResponse> updateMember(
             @PathVariable(name = "workspace_id") UUID workspaceId,
-            @PathVariable(name = "memberId") UUID memberId,
-            @RequestBody UpdateMemberRequest request
+            @PathVariable(name = "member_id") UUID memberId,
+            @RequestBody MemberUpdateRequest request
     ) {
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
@@ -79,7 +79,7 @@ public class MemberController {
     @PostMapping("/{workspace_id}/members/{member_id}")
     public ResponseEntity<Void> expelMember(
             @PathVariable(name = "workspace_id") UUID workspaceId,
-            @PathVariable(name = "memberId") UUID memberId
+            @PathVariable(name = "member_id") UUID memberId
     ) {
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 

@@ -1,6 +1,6 @@
 package org.atlas.workspace.api.dto.response;
 
-import org.atlas.workspace.store.model.Member;
+import org.atlas.workspace.domain.model.Member;
 
 import java.time.Instant;
 import java.util.UUID;

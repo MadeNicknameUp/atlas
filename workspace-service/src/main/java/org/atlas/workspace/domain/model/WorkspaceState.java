@@ -1,4 +1,4 @@
-package org.atlas.workspace.store.model;
+package org.atlas.workspace.domain.model;
 
 public enum WorkspaceState {
     ACTIVE,

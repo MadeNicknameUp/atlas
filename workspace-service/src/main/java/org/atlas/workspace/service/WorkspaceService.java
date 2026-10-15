@@ -2,14 +2,15 @@ package org.atlas.workspace.service;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.workspace.api.dto.command.CreateWorkspaceCommand;
-import org.atlas.workspace.api.dto.command.FindWorkspacesQuery;
+import org.atlas.workspace.api.dto.command.FindDomainQuery;
 import org.atlas.workspace.api.dto.command.PatchValue;
 import org.atlas.workspace.api.dto.command.WorkspaceUpdateCommand;
+import org.atlas.workspace.api.dto.request.WorkspaceFilter;
 import org.atlas.workspace.util.SpecificationUtils;
 import org.atlas.workspace.exception.unit.NotFoundException;
 import org.atlas.workspace.exception.unit.ValidationException;
-import org.atlas.workspace.store.model.Workspace;
-import org.atlas.workspace.store.repository.WorkspaceRepository;
+import org.atlas.workspace.domain.model.Workspace;
+import org.atlas.workspace.domain.repository.WorkspaceRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -43,7 +44,7 @@ public class WorkspaceService {
                 .orElseThrow(() -> new NotFoundException("Workspace with id: %s not found.".formatted(workspaceId)));
     }
 
-    public List<Workspace> getWorkspacesByUserId(UUID userId, FindWorkspacesQuery query) {
+    public List<Workspace> getWorkspacesByUserId(UUID userId, FindDomainQuery<WorkspaceFilter> query) {
 
         Pageable page = PageRequest.of(
                 (query.page() == null || query.page() < 0) ? 0 : query.page(),
