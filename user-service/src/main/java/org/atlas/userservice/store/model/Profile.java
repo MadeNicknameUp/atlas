@@ -20,19 +20,23 @@ public class Profile {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column
+    @Column(length = 255)
     private String fullName;
 
-    @Column
+    @Column(length = 100)
     private String displayName;
 
-    @Column
+    @Column(length = 50)
     private String username;
 
-    @Column
+    @Column(length = 1000)
     private String about;
 
     @Column
     private String position;
+
+    public Profile(User user) {
+        this.user = user;
+    }
 
 }

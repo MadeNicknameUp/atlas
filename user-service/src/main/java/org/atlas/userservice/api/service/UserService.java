@@ -21,8 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    /** GET /me: active=false */
-    @Transactional
+    @Transactional(readOnly = true)
     public User getMe(String subject) {
         return find(subject);
     }
@@ -33,9 +32,7 @@ public class UserService {
 
         Profile profile = user.getProfile();
         if (profile == null) {
-            profile = new Profile();
-            profile.setUser(user);
-            user.setProfile(profile);
+            throw new NotFoundException("Profile not found: userId=" + user.getId());
         }
 
         if (req.has(Field.FULL_NAME))    profile.setFullName(req.getFullName());
@@ -44,6 +41,8 @@ public class UserService {
         if (req.has(Field.ABOUT))        profile.setAbout(req.getAbout());
         if (req.has(Field.POSITION))     profile.setPosition(req.getPosition());
 
+        user.touch();
+
         return user;
     }
 
@@ -51,6 +50,7 @@ public class UserService {
     public User updatePreferences(String subject, Map<String, Object> patch) {
         User user = findActive(subject);
         user.setPreferences(merge(user.getPreferences(), patch));
+        user.touch();
         return user;
     }
 
@@ -58,6 +58,7 @@ public class UserService {
     public User updateNotificationPreferences(String subject, Map<String, Object> patch) {
         User user = findActive(subject);
         user.setNotificationPreferences(merge(user.getNotificationPreferences(), patch));
+        user.touch();
         return user;
     }
 
@@ -70,7 +71,7 @@ public class UserService {
 
     private User find(String subject) {
         return userRepository.findByIdentitySubject(subject)
-                .orElseThrow(() -> new NotFoundException("User not found: subject " + subject));
+                .orElseThrow(() -> new NotFoundException("User not found: subject=" + subject));
     }
 
     private User findActive(String subject) {

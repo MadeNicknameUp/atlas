@@ -51,6 +51,12 @@ public class User {
 
     public User(String identitySubject) {
         this.identitySubject = identitySubject;
+        this.profile = new Profile(this);
+
+    }
+
+    public void touch() {
+        this.updatedAt = Instant.now();
     }
 
     public void deactivate() {

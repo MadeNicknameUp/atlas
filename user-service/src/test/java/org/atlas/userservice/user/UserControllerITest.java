@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -28,6 +29,9 @@ class UserControllerITest extends AbstractITestWithDatabase {
     private MockMvc mockMvc;
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
     private UserRepository userRepository;
 
     @BeforeEach
@@ -38,7 +42,7 @@ class UserControllerITest extends AbstractITestWithDatabase {
     // ---------- GET /me ----------
 
     @Test
-    void getMeReturnsUserWithoutProfile() throws Exception {
+    void getMeReturnsUserWithEmptyProfile() throws Exception {
         // Arrange
         User user = saveUser(SUBJECT);
 
@@ -48,7 +52,12 @@ class UserControllerITest extends AbstractITestWithDatabase {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId().toString()))
                 .andExpect(jsonPath("$.active").value(true))
-                .andExpect(jsonPath("$.profile").value(nullValue()))
+                .andExpect(jsonPath("$.profile").isNotEmpty())
+                .andExpect(jsonPath("$.profile.full_name").value(nullValue()))
+                .andExpect(jsonPath("$.profile.display_name").value(nullValue()))
+                .andExpect(jsonPath("$.profile.username").value(nullValue()))
+                .andExpect(jsonPath("$.profile.about").value(nullValue()))
+                .andExpect(jsonPath("$.profile.position").value(nullValue()))
                 .andExpect(jsonPath("$.preferences").isEmpty())
                 .andExpect(jsonPath("$.notification_preferences").isEmpty())
                 .andExpect(jsonPath("$.created_at").isNotEmpty())
@@ -140,7 +149,17 @@ class UserControllerITest extends AbstractITestWithDatabase {
                 .andExpect(jsonPath("$.message").value(containsString("username")))
                 .andExpect(jsonPath("$.path").value(BASE + "/profile"));
 
-        assertThat(reload().getProfile()).isNull();
+        assertThat(reload().getProfile().getUsername()).isNull();
+    }
+
+    @Test
+    void profileAboutAcceptsMaximumAllowedLength() throws Exception {
+        saveUser(SUBJECT);
+        String json = "{\"about\": \"" + "a".repeat(1000) + "\"}";
+
+        patchJson(BASE + "/profile", json).andExpect(status().isOk());
+
+        assertThat(reload().getProfile().getAbout()).hasSize(1000);
     }
 
     @Test
@@ -152,14 +171,33 @@ class UserControllerITest extends AbstractITestWithDatabase {
 
         // Act & Assert
         patchJson(BASE + "/profile", """
-                {"full_name": "Maksym"}
-                """)
+            {"full_name": "Maksym"}
+            """)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(403))
                 .andExpect(jsonPath("$.message").value(containsString(user.getId().toString())))
                 .andExpect(jsonPath("$.path").value(BASE + "/profile"));
 
-        assertThat(reload().getProfile()).isNull();
+        assertThat(reload().getProfile().getFullName()).isNull();
+    }
+
+    @Test
+    void profileUpdateWhenProfileRowIsMissingReturns404() throws Exception {
+        // Arrange
+        User user = saveUser(SUBJECT);
+        jdbcTemplate.update("delete from atlas_profile");
+
+        // Act & Assert
+        patchJson(BASE + "/profile", """
+            {"full_name": "Maksym"}
+            """)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(404))
+                .andExpect(jsonPath("$.message").value(containsString(user.getId().toString())))
+                .andExpect(jsonPath("$.path").value(BASE + "/profile"));
+
+        // PATCH не должен был создать профиль
+        assertThat(jdbcTemplate.queryForObject("select count(*) from atlas_profile", Integer.class)).isZero();
     }
 
     // ---------- PATCH /me/preferences, /me/notification-preferences ----------
