@@ -3,7 +3,7 @@ package org.atlas.workspace.api.dto.response;
 import org.atlas.workspace.domain.model.Member;
 import org.atlas.workspace.domain.model.MemberState;
 
-public record ThickGetMemberResponse(
+public record ThickMemberResponse(
         String id,
         String userId,
         String role,
@@ -15,8 +15,8 @@ public record ThickGetMemberResponse(
         String updatedBy,
         String removedBy
 ) {
-    public static ThickGetMemberResponse from(Member member) {
-        return new ThickGetMemberResponse(
+    public static ThickMemberResponse from(Member member) {
+        return new ThickMemberResponse(
                 member.getId().toString(),
                 member.getUserId().toString(),
                 member.getRole().toString(),
@@ -24,9 +24,9 @@ public record ThickGetMemberResponse(
                 member.getJoinedAt().toString(),
                 member.getUpdatedAt().toString(),
                 member.getState().equals(MemberState.ACTIVE) ? null : member.getExpelledAt().toString(),
-                member.getInvitedBy().getUserId().toString(), // <-- we really need display name or smth?
-                member.getUpdatedBy().getUserId().toString(), // <-- we really need display name or smth?
-                member.getState().equals(MemberState.ACTIVE) ? null : member.getExpelledBy().getUserId().toString()  // <-- we really need display name or smth?
+                member.getInvitedBy().getUserId().toString(),
+                member.getUpdatedBy().getUserId().toString(),
+                member.getState().equals(MemberState.ACTIVE) ? null : member.getExpelledBy().getUserId().toString()
         );
     }
 }

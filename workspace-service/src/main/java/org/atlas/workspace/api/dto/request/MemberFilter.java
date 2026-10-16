@@ -6,7 +6,7 @@ public record MemberFilter(
         String role,
         String state,
         String invitedBy,
-        String removedBy,
+        String expelledBy,
         Instant joinedFrom,
         Instant joinedUntil
 ) implements SearchFilter {

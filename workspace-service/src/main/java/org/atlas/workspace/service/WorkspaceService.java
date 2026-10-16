@@ -6,7 +6,7 @@ import org.atlas.workspace.api.dto.command.FindDomainQuery;
 import org.atlas.workspace.api.dto.command.PatchValue;
 import org.atlas.workspace.api.dto.command.WorkspaceUpdateCommand;
 import org.atlas.workspace.api.dto.request.WorkspaceFilter;
-import org.atlas.workspace.util.SpecificationUtils;
+import org.atlas.workspace.util.WorkspaceSpecificationUtils;
 import org.atlas.workspace.exception.unit.NotFoundException;
 import org.atlas.workspace.exception.unit.ValidationException;
 import org.atlas.workspace.domain.model.Workspace;
@@ -55,14 +55,14 @@ public class WorkspaceService {
                 )
         );
 
-        Specification<Workspace> specification = SpecificationUtils.containsUserId(userId);
+        Specification<Workspace> specification = WorkspaceSpecificationUtils.containsUserId(userId);
 
-        specification = specification.and(SpecificationUtils.hasNameLike(query.filter().name()));
-        specification = specification.and(SpecificationUtils.hasDescriptionLike(query.filter().description()));
-        specification = specification.and(SpecificationUtils.hasStateEqual(query.filter().state()));
-        specification = specification.and(SpecificationUtils.hasOwnerEqual(query.filter().ownerId()));
-        specification = specification.and(SpecificationUtils.isLaterThen(query.filter().from()));
-        specification = specification.and(SpecificationUtils.isEarlierThen(query.filter().until()));
+        specification = specification.and(WorkspaceSpecificationUtils.hasNameLike(query.filter().name()));
+        specification = specification.and(WorkspaceSpecificationUtils.hasDescriptionLike(query.filter().description()));
+        specification = specification.and(WorkspaceSpecificationUtils.hasStateEqual(query.filter().state()));
+        specification = specification.and(WorkspaceSpecificationUtils.hasOwnerEqual(query.filter().ownerId()));
+        specification = specification.and(WorkspaceSpecificationUtils.isLaterThen(query.filter().from()));
+        specification = specification.and(WorkspaceSpecificationUtils.isEarlierThen(query.filter().until()));
 
         // Step 1: Get all workspaces that user is a part of.
         // Step 2: Filter these workspaces according to the provided filter (specification).

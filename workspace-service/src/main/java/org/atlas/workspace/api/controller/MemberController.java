@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.workspace.api.dto.command.FindDomainQuery;
 import org.atlas.workspace.api.dto.request.MemberFilter;
 import org.atlas.workspace.api.dto.request.MemberUpdateRequest;
-import org.atlas.workspace.api.dto.response.ThickGetMemberResponse;
+import org.atlas.workspace.api.dto.response.ThickMemberResponse;
 import org.atlas.workspace.api.dto.response.ThinMemberResponse;
 import org.atlas.workspace.service.MemberService;
 import org.springframework.http.HttpStatus;
@@ -46,14 +46,14 @@ public class MemberController {
     }
 
     @GetMapping("/{workspace_id}/members/{member_id}")
-    public ResponseEntity<ThickGetMemberResponse> getMember(
+    public ResponseEntity<ThickMemberResponse> getMember(
             @PathVariable(name = "workspace_id") UUID workspaceId,
             @PathVariable(name = "member_id") UUID memberId
     ) {
 
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
-        return ResponseEntity.ok(ThickGetMemberResponse.from(memberService.findById(
+        return ResponseEntity.ok(ThickMemberResponse.from(memberService.findMemberById(
                 userId,
                 workspaceId,
                 memberId))
@@ -61,14 +61,14 @@ public class MemberController {
     }
 
     @PatchMapping("/{workspace_id}/members/{member_id}")
-    public ResponseEntity<ThickGetMemberResponse> updateMember(
+    public ResponseEntity<ThickMemberResponse> updateMember(
             @PathVariable(name = "workspace_id") UUID workspaceId,
             @PathVariable(name = "member_id") UUID memberId,
             @RequestBody MemberUpdateRequest request
     ) {
         UUID userId = UUID.fromString("3adc4dd4-b5c0-4345-bf83-c44ef92188b9");
 
-        return ResponseEntity.ok(ThickGetMemberResponse.from(memberService.updateMember(
+        return ResponseEntity.ok(ThickMemberResponse.from(memberService.updateMember(
                 userId,
                 workspaceId,
                 memberId,

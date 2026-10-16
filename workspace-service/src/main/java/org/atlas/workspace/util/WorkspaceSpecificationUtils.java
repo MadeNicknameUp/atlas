@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
-public class SpecificationUtils {
+public class WorkspaceSpecificationUtils {
 
     public static Specification<Workspace> containsUserId(UUID userId) {
         return (root, query, cb) -> {
@@ -27,9 +27,9 @@ public class SpecificationUtils {
 
     public static Specification<Workspace> hasNameLike(String name) {
 
-        return (root, query, cb) -> {
+        return (root, _, cb) -> {
 
-            if (name == null) {
+            if (name == null || name.isBlank()) {
                 return null;
             }
 
@@ -39,9 +39,9 @@ public class SpecificationUtils {
 
     public static Specification<Workspace> hasDescriptionLike(String description) {
 
-        return (root, query, cb) -> {
+        return (root, _, cb) -> {
 
-            if (description == null) {
+            if (description == null || description.isBlank()) {
                 return null;
             }
 
@@ -51,9 +51,9 @@ public class SpecificationUtils {
 
     public static Specification<Workspace> hasStateEqual(String state) {
 
-        return (root, query, cb) -> {
+        return (root, _, cb) -> {
 
-            if (state == null) {
+            if (state == null || state.isBlank()) {
                 return null;
             }
 
@@ -63,7 +63,7 @@ public class SpecificationUtils {
 
     public static Specification<Workspace> hasOwnerEqual(String ownerId) {
 
-        return (root, query, cb) -> {
+        return (root, _, cb) -> {
 
             if (ownerId == null) {
                 return null;
@@ -75,7 +75,7 @@ public class SpecificationUtils {
 
     public static Specification<Workspace> isLaterThen(Instant date) {
 
-        return (root, query, cb) -> {
+        return (root, _, cb) -> {
 
             if (date == null) {
                 return null;
@@ -87,7 +87,7 @@ public class SpecificationUtils {
 
     public static Specification<Workspace> isEarlierThen(Instant date) {
 
-        return (root, query, cb) -> {
+        return (root, _, cb) -> {
 
             if (date == null) {
                 return null;
@@ -96,6 +96,5 @@ public class SpecificationUtils {
             return cb.lessThanOrEqualTo(root.get("createdAt"), date);
         };
     }
-
 
 }

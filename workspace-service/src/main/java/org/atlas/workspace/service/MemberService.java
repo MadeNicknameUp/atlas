@@ -11,8 +11,12 @@ import org.atlas.workspace.domain.model.Member;
 import org.atlas.workspace.domain.model.MemberRole;
 import org.atlas.workspace.domain.model.MemberState;
 import org.atlas.workspace.domain.repository.MemberRepository;
+import org.atlas.workspace.util.MemberSpecificationUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,45 +29,47 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    // TODO: This method is trash and needs to be reworked.
     public List<Member> findMembersByWorkspaceId(UUID userId, UUID workspaceId, FindDomainQuery<MemberFilter> query) {
 
         Pageable page = PageRequest.of(
                 (query.page() == null || query.page() < 0) ? 0 : query.page(),
-                (query.pageSize() == null || query.pageSize() < 0)? 25 : query.pageSize()
+                (query.pageSize() == null || query.pageSize() < 0)? 25 : query.pageSize(),
+                Sort.by(
+                        Sort.Order.desc("joinedAt"),
+                        Sort.Order.desc("id")
+                )
         );
 
-        // Where are the filters?
+        Specification<Member> specification = MemberSpecificationUtils.allMembersByWorkspace(workspaceId);
 
-        List<Member> members = memberRepository.findAllByWorkspaceId(workspaceId, page);
+        specification = specification.and(MemberSpecificationUtils.ifActorIsMember(userId));
+        specification = specification.and(MemberSpecificationUtils.hasRoleEqual(query.filter().role()));
+        specification = specification.and(MemberSpecificationUtils.hasStateEqual(query.filter().state()));
+        specification = specification.and(MemberSpecificationUtils.isLaterThen(query.filter().joinedFrom()));
+        specification = specification.and(MemberSpecificationUtils.isEarlierThen(query.filter().joinedUntil()));
+        specification = specification.and(MemberSpecificationUtils.wasExpelledBy(query.filter().expelledBy()));
+        specification = specification.and(MemberSpecificationUtils.wasInvitedBy(query.filter().invitedBy()));
 
-        // Wth is this, this does not even work. You look ONLY on the page, not an entire list, just delegate to DB.
-        if (members.stream().anyMatch(m -> m.getId().equals(userId) && m.getState().equals(MemberState.ACTIVE))) {
-            throw new NotFoundException("Workplace with id: %s not found.".formatted(workspaceId));
+        Page<Member> members = memberRepository.findAll(
+                specification,
+                page
+                );
+
+        if (members.isEmpty()) {
+            throw new NotFoundException("No members for workspace: %s found.".formatted(workspaceId));
         }
 
-        return members;
-//                .stream()
-//                .filter(m -> query.filter().applyOn(m))
-//                .toList();
+        return members.getContent();
     }
 
-    public Member findById(UUID userId, UUID workspaceId, UUID memberId) {
+    public Member findMemberById(UUID userId, UUID workspaceId, UUID memberId) {
 
-        // Why is Owner the only one to see this? This is wrong, another method is needed.
-        Member member = memberRepository.findByIdAndWorkspaceIdAndWorkspaceOwnerId(memberId, workspaceId, userId)
-                .orElseThrow(() -> new NotFoundException("Member with id: %s not found.".formatted(workspaceId)));
-
-        // Just delegate this to DB (in one query plz).
-        if (member
-                .getWorkspace()
-                .getMembers()
-                .stream()
-                .noneMatch(m -> m.getUserId().equals(userId) && m.getState().equals(MemberState.ACTIVE))) {
-            throw new NotFoundException("Member with id: %s not found.".formatted(workspaceId));
-        }
-
-        return member;
+        return memberRepository.findByIdAndWorkspaceIdAndWorkspaceMembersUserIdAndState(
+                    memberId,
+                    workspaceId,
+                    userId,
+                    MemberState.ACTIVE
+                ).orElseThrow(() -> new NotFoundException("Member with id: %s not found.".formatted(workspaceId)));
     }
 
     @Transactional
@@ -92,9 +98,7 @@ public class MemberService {
         Member member = memberRepository.findByIdAndWorkspaceIdAndWorkspaceOwnerId(memberId, workspaceId, userId)
                 .orElseThrow(() -> new NotFoundException("Member with id: %s not found.".formatted(workspaceId)));
 
-        member.expel(memberRepository.findAllByWorkspaceIdAndId(workspaceId, memberId).orElseThrow(
-                () -> new NotFoundException("Member with id: %s not found.".formatted(workspaceId))
-        ));
+        member.expel(member);
     }
 }
 
