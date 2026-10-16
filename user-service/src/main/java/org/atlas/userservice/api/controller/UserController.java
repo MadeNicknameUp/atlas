@@ -42,7 +42,7 @@ public class UserController {
     @PatchMapping("/preferences")
     public ResponseEntity<UserResponse> updatePreferences(
             @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject,
-            @Valid @RequestBody Map<String, Object> request
+            @RequestBody Map<String, Object> request
     ) {
         return ResponseEntity.ok(UserResponse
                 .from(userService.updatePreferences(subject, request)));
@@ -51,7 +51,7 @@ public class UserController {
     @PatchMapping("/notification-preferences")
     public ResponseEntity<UserResponse> updateNotificationPreferences(
             @RequestHeader(value = SUBJECT_HEADER, defaultValue = DEV_SUBJECT) String subject,
-            @Valid @RequestBody Map<String, Object> request
+            @RequestBody Map<String, Object> request
     ) {
         return ResponseEntity.ok(UserResponse
                 .from(userService.updateNotificationPreferences(subject, request)));

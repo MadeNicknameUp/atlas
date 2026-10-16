@@ -22,17 +22,12 @@ public class UpdateProfileRequest {
     }
 
     public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; provided.add(Field.FULL_NAME); }
 
     public String getDisplayName() { return displayName; }
-    public void setDisplayName(String displayName) { this.displayName = displayName; provided.add(Field.DISPLAY_NAME); }
 
     public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; provided.add(Field.USERNAME); }
 
     public String getAbout() { return about; }
-    public void setAbout(String about) { this.about = about; provided.add(Field.ABOUT); }
 
     public String getPosition() { return position; }
-    public void setPosition(String position) { this.position = position; provided.add(Field.POSITION); }
 }
