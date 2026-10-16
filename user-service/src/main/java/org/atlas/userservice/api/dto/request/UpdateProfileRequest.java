@@ -21,13 +21,23 @@ public class UpdateProfileRequest {
         return provided.contains(field);
     }
 
-    public String getFullName() { return fullName; }
+    public String getFullName() {
+        return fullName;
+    }
 
-    public String getDisplayName() { return displayName; }
+    public String getDisplayName() {
+        return displayName;
+    }
 
-    public String getUsername() { return username; }
+    public String getUsername() {
+        return username;
+    }
 
-    public String getAbout() { return about; }
+    public String getAbout() {
+        return about;
+    }
 
-    public String getPosition() { return position; }
+    public String getPosition() {
+        return position;
+    }
 }

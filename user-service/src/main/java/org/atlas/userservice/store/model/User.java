@@ -55,10 +55,6 @@ public class User {
 
     }
 
-    public void touch() {
-        this.updatedAt = Instant.now();
-    }
-
     public void deactivate() {
         this.active = false;
     }

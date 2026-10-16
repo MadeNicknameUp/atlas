@@ -41,8 +41,6 @@ public class UserService {
         if (req.has(Field.ABOUT))        profile.setAbout(req.getAbout());
         if (req.has(Field.POSITION))     profile.setPosition(req.getPosition());
 
-        user.touch();
-
         return user;
     }
 
@@ -50,7 +48,6 @@ public class UserService {
     public User updatePreferences(String subject, Map<String, Object> patch) {
         User user = findActive(subject);
         user.setPreferences(merge(user.getPreferences(), patch));
-        user.touch();
         return user;
     }
 
@@ -58,7 +55,6 @@ public class UserService {
     public User updateNotificationPreferences(String subject, Map<String, Object> patch) {
         User user = findActive(subject);
         user.setNotificationPreferences(merge(user.getNotificationPreferences(), patch));
-        user.touch();
         return user;
     }
 
